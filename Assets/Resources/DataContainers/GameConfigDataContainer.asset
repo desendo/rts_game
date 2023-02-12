@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8049bc6ea9414e3aa3a3628f2c25ff24, type: 3}
+  m_Name: GameConfigDataContainer
+  m_EditorClassIdentifier: 
+  Data:
+    GeneralConfig:
+      DailyRewardLoopSize: 0
+      MediumPerHard: 0
+      SoftPerHard: 0
+    UnitConfigs:
+    - Id: barracks_evil_1
+      ViewId: barracks_evil_1_view
+    - Id: warrior_evil_1
+      ViewId: warrior_evil_1_view
+    AspectHealthConfigs:
+    - Id: barracks_evil_1
+      Max: 100
+    - Id: warrior_evil_1
+      Max: 100
+    AspectAttackConfigs:
+    - Id: warrior_evil_1
+      Delay: 2
+      Damage: 12
+    AspectMoveConfigs:
+    - Id: warrior_evil_1
+      Speed: 1
+      RotationSpeed: 50
+    AspectProductionConfigs:
+    - Id: barracks_evil_1
+      Duration: 15
+      ResultId: warrior_evil_1
+      ResultType: unit
+      ResultAmount: 1
