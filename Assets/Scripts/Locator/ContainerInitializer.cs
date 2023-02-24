@@ -24,21 +24,20 @@ namespace Locator
             DontDestroyOnLoad(this);
             _instance = this;
 
-            Bind();
-            Container.SetBindComplete(true);
-            Container.Init();
-        }
-        private void Bind()
-        {
             AddDataContainers();
             AddServices();
             AddRules();
+
+            Container.SetAddComplete(true);
+            Container.Init();
         }
 
         private void AddDataContainers()
         {
+            Container.Add<VisualData>(_visualData.Data);
             Container.Add<DataContainer<VisualData>>(_visualData);
             Container.Add<DataContainer<GameConfigData>>(_gameConfigData);
+            Container.Add<GameConfigData>(_gameConfigData.Data);
             Container.Add<DataContainer<PlayerData>>(_playerData);
         }
 
@@ -47,6 +46,12 @@ namespace Locator
             Container.Add<GameLoadRule>();
             Container.Add<SaveLoadPlayerDataRule>();
             Container.Add<ClickRule>();
+            Container.Add<UnitSelectedRule>();
+            Container.Add<ProductionQueueRule>();
+            Container.Add<StartProductionRule>();
+            Container.Add<RunProductionRule>();
+            Container.Add<CameraMoveRule>();
+            Container.Add<DebugKeysRule>();
         }
 
         private static void AddServices()

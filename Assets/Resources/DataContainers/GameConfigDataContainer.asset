@@ -14,30 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Data:
     GeneralConfig:
-      DailyRewardLoopSize: 0
-      MediumPerHard: 0
-      SoftPerHard: 0
-    UnitConfigs:
-    - Id: barracks_evil_1
-      ViewId: barracks_evil_1_view
-    - Id: warrior_evil_1
-      ViewId: warrior_evil_1_view
+      BorderScrollSpeed: 60
+      CameraRotateSpeed: 0.1
+      DragScrollSpeed: 0.001
     AspectHealthConfigs:
-    - Id: barracks_evil_1
+    - Id: factory_1
       Max: 100
-    - Id: warrior_evil_1
+    - Id: tank_1
       Max: 100
     AspectAttackConfigs:
-    - Id: warrior_evil_1
+    - Id: tank_1
       Delay: 2
       Damage: 12
     AspectMoveConfigs:
-    - Id: warrior_evil_1
-      Speed: 1
-      RotationSpeed: 50
+    - Id: tank_1
+      Speed: 10
+      Acceleration: 15
+      RotationSpeed: 2000
     AspectProductionConfigs:
-    - Id: barracks_evil_1
-      Duration: 15
-      ResultId: warrior_evil_1
-      ResultType: unit
+    - Id: factory_1
+      ProductionVariantConfigs:
+      - Price:
+        - Type: energy
+          Amount: 100
+        Duration: 3
+        ResultId: tank_1
+    ResultConfigs:
+    - Id: tank_1
+      ResultType: 1
       ResultAmount: 1

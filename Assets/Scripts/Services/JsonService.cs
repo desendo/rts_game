@@ -14,7 +14,6 @@ namespace Services
 
     public class VectorConverter : JsonConverter
     {
-
         public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             var t = serializer.Deserialize(reader);
@@ -34,8 +33,6 @@ namespace Services
             writer.WriteValue(v.z);
             writer.WriteEndObject();
         }
-
-
         public override bool CanConvert(Type type)
         {
             return type  == typeof(Vector3);
@@ -89,7 +86,6 @@ namespace Services
 
         public string ToJson(object obj)
         {
-
             return JsonConvert.SerializeObject(obj, _settings);
         }
     }

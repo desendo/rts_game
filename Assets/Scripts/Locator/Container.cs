@@ -28,7 +28,6 @@ namespace Locator
         private static readonly Dictionary<Type, object> _instancesByType = new Dictionary<Type, object>();
         private static readonly ReactiveProperty<bool> _bindComplete = new ReactiveProperty<bool>();
 
-
         public static IReadOnlyReactiveProperty<bool> BindComplete => _bindComplete;
         static Container()
         {
@@ -156,7 +155,7 @@ namespace Locator
             return new List<T>();
         }
 
-        public static void SetBindComplete(bool isComplete)
+        public static void SetAddComplete(bool isComplete)
         {
             _bindComplete.Value = isComplete;
         }

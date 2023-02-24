@@ -13,6 +13,16 @@ MonoBehaviour:
   m_Name: VisualDataContainer
   m_EditorClassIdentifier: 
   Data:
+    IconButtonView: {fileID: 1816124834279266648, guid: 45963d201a7e57643b8b52f0caf63097,
+      type: 3}
     UnitViews:
-    - Id: barracks_evil_1_view
+    - Id: factory_1
       Obj: {fileID: 2558760202264204109, guid: 757975954c004c44b8ac24df8d675350, type: 3}
+    - Id: tank_1
+      Obj: {fileID: 7586093616386629789, guid: 7f69ea9cb5c65684ca438098f03a38d6, type: 3}
+    Sprites:
+    - Id: factory_1
+      Obj: {fileID: 21300000, guid: 7a58b6c80b520f8499ba3501ceb2ce11, type: 3}
+    - Id: tank_1
+      Obj: {fileID: 21300000, guid: d637f84b259664a4184202d65fada1d9, type: 3}
+    WindowPrefabs: []

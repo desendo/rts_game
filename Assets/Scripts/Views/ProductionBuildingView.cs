@@ -1,10 +1,9 @@
-using System;
 using Locator;
-using Models;
 using Services;
 using Services.PrefabPool;
 using Signals;
 using UniRx;
+using UnityEditor.AI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -13,16 +12,26 @@ namespace Views
     public class UnitView : MonoPoolableObject, IPointerClickHandler, IModelView
     {
         [SerializeField] private Collider _collider;
+        [SerializeField] private GameObject _selected;
+        [SerializeField] private GameObject _hovered;
+        //[SerializeField] private GameObject _actioned;
         private GameMessenger _messenger;
-        private IModel _model;
+        private UnitCompositionBase _model;
 
         protected readonly CompositeDisposable _sup = new CompositeDisposable();
-        public virtual IModel Model => _model;
-        public virtual void Bind(IModel model)
+        public virtual UnitCompositionBase Model => _model;
+        public virtual void Bind(UnitCompositionBase model)
         {
+            _model = model;
+            model.AspectSelection.Hovered.Subscribe(b => { _hovered.SetActive(b);}).AddTo(_sup);
+            model.AspectSelection.Selected.Subscribe(b => { _selected.SetActive(b);}).AddTo(_sup);
+            transform.position = model.AspectUnit.Position.Value;
+            transform.rotation = model.AspectUnit.Rotation.Value;
+            //model.AspectSelection.Actioned.Subscribe(b => { _actioned.SetActive(b);}).AddTo(_sup);
+            NavMeshBuilder.BuildNavMesh();
         }
 
-        protected override void Awake()
+        public override void Awake()
         {
             base.Awake();
             _messenger = Container.Get<GameMessenger>();
@@ -32,11 +41,11 @@ namespace Views
         {
             if (eventData.button == PointerEventData.InputButton.Left)
             {
-                _messenger.Fire(new MainSignals.SelectModelView(_model));
+                _messenger.Fire(new MainSignals.SelectRequest(_model));
             }
             if (eventData.button == PointerEventData.InputButton.Right)
             {
-                _messenger.Fire(new MainSignals.ContextActionModelView(_model));
+                _messenger.Fire(new MainSignals.ContextActionRequest(_model));
             }
         }
 
@@ -44,6 +53,14 @@ namespace Views
         {
             _sup.Clear();
             base.OnDespawned();
+            NavMeshBuilder.BuildNavMesh();
+
+        }
+
+        public override void Dispose()
+        {
+            PrefabPool.InstanceGlobal.Despawn(this);
+
         }
 
         private void OnDestroy()
@@ -54,7 +71,7 @@ namespace Views
 
     public interface IModelView
     {
-        IModel Model { get; }
-        void Bind(IModel model);
+        UnitCompositionBase Model { get; }
+        void Bind(UnitCompositionBase model);
     }
 }

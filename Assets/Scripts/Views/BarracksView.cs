@@ -1,22 +1,22 @@
-﻿using Models;
-using UniRx;
+﻿using System;
+using System.Collections.Generic;
+using Models;
+using Services;
+using UnityEngine;
+
 namespace Views
 {
     public class BarracksView : UnitView
     {
-        public override void Bind(IModel model)
+        [SerializeField] private Transform _anchor1;
+        [SerializeField] private Transform _anchor2;
+
+        public override void Bind(UnitCompositionBase model)
         {
             base.Bind(model);
-            if (model is UnitModel unitModelBase)
+            if (model is UnitsService.CompositionUnitFactory barracksModel)
             {
-                foreach (var aspect in unitModelBase.Aspects)
-                {
-                    if (aspect is AspectTransform aspectTransform)
-                    {
-                        aspectTransform.Position.Subscribe(x => transform.position = x).AddTo(_sup);
-                        aspectTransform.Rotation.Subscribe(x => transform.rotation = x).AddTo(_sup);
-                    }
-                }
+
             }
 
         }

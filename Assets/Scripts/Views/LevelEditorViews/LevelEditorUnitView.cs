@@ -2,7 +2,6 @@ using Locator;
 using Services;
 using UnityEngine;
 using UniRx;
-using Unity.Mathematics;
 
 namespace Views.LevelEditorViews
 {
@@ -18,12 +17,12 @@ namespace Views.LevelEditorViews
             {
                 _levelService = Container.Get<ILevelService>();
                 _gameStateService = Container.Get<IGameStateService>();
-                _levelService.OnGatherLevelConfigStartedRequest.Subscribe(OnGatherRequired).AddTo(this);
+                _levelService.OnGatherLevelConfigStartedRequest.Subscribe(OnGatherRequest).AddTo(this);
             }).AddTo(this);
         }
 
 
-        private void OnGatherRequired(bool isRequired)
+        private void OnGatherRequest(bool isRequired)
         {
             if (isRequired)
             {
@@ -42,7 +41,7 @@ namespace Views.LevelEditorViews
     public class LevelEditorUnitData
     {
         public int PlayerIndex;
-        public string UnitId;
+        public string Id;
         public string ConfigId;
         [HideInInspector]
         public Vector3 Position;

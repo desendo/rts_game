@@ -3,10 +3,12 @@ using System.Linq;
 using Data;
 using Locator;
 using UniRx;
+using UnityEngine;
 using Views.LevelEditorViews;
 
 namespace Services
 {
+
     public interface ILevelService : IDataHandler<PlayerData>
     {
         public IReadOnlyReactiveProperty<bool> LevelDataInitialized { get; }
@@ -14,6 +16,13 @@ namespace Services
         public IReadOnlyReactiveProperty<LevelSaveData> CurrentLevelSaveData { get; }
         void InitLevelSaveData();
         void AddUnitLevelEditorData(LevelEditorUnitData levelEditorUnitData);
+        void SetMapCorners(Transform[] worldCorners);
+        Transform[] WorldCorners { get; }
+        float MapXMin { get; }
+        float MapXMax { get; }
+        float MapYMin { get; }
+        float MapYMax { get; }
+        Vector3 GetPlaneCoordinates(Vector2 normalized);
     }
 
     public class LevelService : ILevelService
@@ -30,6 +39,17 @@ namespace Services
 
         private readonly List<LevelEditorUnitData> _levelEditorUnitsData = new List<LevelEditorUnitData>();
         private readonly GameConfigData _config;
+        private Transform[] _worldCorners;
+        public Transform[] WorldCorners => _worldCorners;
+        public float MapXMin { get; private set; }
+        public float MapXMax { get; private set; }
+        public float MapYMin { get; private set; }
+        public float MapYMax { get; private set; }
+        public Vector3 GetPlaneCoordinates(Vector2 normalized)
+        {
+            return new Vector3(MapXMin + (MapXMax - MapXMin) * normalized.x,0, MapYMin + (MapYMax - MapYMin) * normalized.y);
+        }
+
         public LevelService()
         {
             _config = Container.Get<DataContainer<GameConfigData>>().Data;
@@ -48,13 +68,30 @@ namespace Services
 
         public void AddUnitLevelEditorData(LevelEditorUnitData levelEditorUnitData)
         {
-            if(string.IsNullOrEmpty(levelEditorUnitData.UnitId))
-                levelEditorUnitData.UnitId = GenerateUnitId();
+            if(string.IsNullOrEmpty(levelEditorUnitData.Id))
+                levelEditorUnitData.Id = GenerateId();
             _levelEditorUnitsData.Add(levelEditorUnitData);
 
-            string GenerateUnitId()
+            string GenerateId()
             {
                 return levelEditorUnitData.ConfigId + "_" + _levelEditorUnitsData.Count;
+            }
+        }
+
+        public void SetMapCorners(Transform[] worldCorners)
+        {
+            _worldCorners = worldCorners;
+
+            foreach (var worldCorner in _worldCorners)
+            {
+                if (worldCorner.position.x < MapXMin)
+                    MapXMin = worldCorner.position.x;
+                if (worldCorner.position.x > MapXMax)
+                    MapXMax = worldCorner.position.x;
+                if (worldCorner.position.z < MapYMin)
+                    MapYMin = worldCorner.position.z;
+                if (worldCorner.position.z > MapYMax)
+                    MapYMax = worldCorner.position.z;
             }
         }
 
@@ -67,20 +104,34 @@ namespace Services
             for (var i = 0; i < _levelEditorUnitsData.Count; i++)
             {
                 var editorData = _levelEditorUnitsData[i];
-                var viewId = _config.UnitConfigs.FirstOrDefault(x => x.Id == editorData.ConfigId)?.ViewId;
-                levelSaveData.UnitsSaveData.Add( new UnitSaveData()
+                var id = editorData.ConfigId;
+                levelSaveData.AspectsUnitSaveData.Add( new AspectUnitSaveData
                 {
+                    Id = i,
+                    ConfigId = editorData.ConfigId,
                     Position = editorData.Position,
                     Rotation = editorData.Rotation,
-                    UnitId = editorData.UnitId,
-                    ConfigId = editorData.ConfigId,
-                    ViewId = viewId,
                     PlayerIndex = editorData.PlayerIndex
-
                 });
+
+                var attackConfig = _config.AspectAttackConfigs.FirstOrDefault(x => x.Id == id);
+                if (attackConfig != null)
+                    levelSaveData.AspectsAttackSaveData.Add(new AspectAttackSaveData(attackConfig, i));
+
+                var moveConfig = _config.AspectMoveConfigs.FirstOrDefault(x => x.Id == id);
+                if (moveConfig != null)
+                    levelSaveData.AspectsMoveSaveData.Add(new AspectMoveSaveData(i, moveConfig));
+
+                var healthConfig = _config.AspectHealthConfigs.FirstOrDefault(x => x.Id == id);
+                if (healthConfig != null)
+                    levelSaveData.AspectsHealthSaveData.Add(new AspectHealthSaveData(i, healthConfig));
+
+                var productionConfig = _config.AspectProductionConfigs.FirstOrDefault(x => x.Id == id);
+                if (productionConfig != null)
+                    levelSaveData.AspectsProductionSaveData.Add(new AspectProductionSaveData(i, productionConfig));
+
             }
             return levelSaveData;
-
         }
 
         public void SaveData(PlayerData data)

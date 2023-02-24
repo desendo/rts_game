@@ -12,14 +12,26 @@ namespace Rules
         private readonly List<IDataHandler<PlayerData>> _playerDataInitializers;
         private readonly IGameStateService _gameStateService;
         private readonly GameMessenger _messenger;
+        private readonly List<IDataHandler<LevelSaveData>> _levelSaveDataInitializers;
+        private List<IDataHandler<GameConfigData>> _gameConfigInitializers;
+        private readonly ISceneLoadService _sceneLoadService;
+        private readonly ILevelService _levelService;
+        private IGameConfigService _gameConfigService;
+        private readonly List<ISpawn> _spawns;
 
         public SaveLoadPlayerDataRule()
         {
+            _sceneLoadService = Container.Get<ISceneLoadService>();
+            _levelService = Container.Get<ILevelService>();
+            _gameConfigService = Container.Get<IGameConfigService>();
+            _gameConfigInitializers = Container.GetList<IDataHandler<GameConfigData>>();
             _playerProfileService = Container.Get<IPlayerProfileService>();
-            _playerDataInitializers = Container.GetList<IDataHandler<PlayerData>>();
+            _spawns = Container.GetList<ISpawn>();
             _gameStateService = Container.Get<IGameStateService>();
-            _messenger = Container.Get<GameMessenger>();
+            _playerDataInitializers = Container.GetList<IDataHandler<PlayerData>>();
+            _levelSaveDataInitializers = Container.GetList<IDataHandler<LevelSaveData>>();
 
+            _messenger = Container.Get<GameMessenger>();
             _messenger.Subscribe<MainSignals.SaveGameRequest>(x => OnSaveDataRequest());
             _messenger.Subscribe<MainSignals.LoadGameRequest>(x => OnLoadDataRequest());
         }
@@ -28,6 +40,10 @@ namespace Rules
         {
             if (_gameStateService.CurrentState.Value == GameStateService.State.Loaded)
             {
+
+                foreach (var service in _levelSaveDataInitializers)
+                    service.SaveData(_levelService.CurrentLevelSaveData.Value);
+
                 foreach (var service in _playerDataInitializers)
                     service.SaveData(_playerProfileService.CurrentPlayerData);
 
@@ -42,16 +58,20 @@ namespace Rules
             {
                 _gameStateService.SetState(GameStateService.State.Loading);
 
+                _spawns.ForEach(x=>x.DeSpawnViews());
+                _spawns.ForEach(x=>x.SetSpawned(false));
                 _playerProfileService.LoadProfile(data =>
                 {
-                    _playerDataInitializers
-                        .ForEach(x => x.LoadData(data));
-
+                    _playerDataInitializers.ForEach(x => x.LoadData(data));
+                    _levelService.InitLevelSaveData();
+                    var currentLevelData = _levelService.CurrentLevelSaveData.Value;
+                    _levelSaveDataInitializers.ForEach(x => x.LoadData(currentLevelData));
+                    _spawns.ForEach(x=>x.SpawnViews());
+                    _spawns.ForEach(x=>x.SetSpawned(true));
                     _gameStateService.SetState(GameStateService.State.Loaded);
 
                 });
             }
-
         }
     }
 }

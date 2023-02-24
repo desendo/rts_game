@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Data
 {
@@ -6,11 +7,11 @@ namespace Data
     public class GameConfigData : IData
     {
         public GeneralConfig GeneralConfig;
-        public UnitConfig[] UnitConfigs;
         public AspectHealthConfig[] AspectHealthConfigs;
         public AspectAttackConfig[] AspectAttackConfigs;
         public AspectMoveConfig[] AspectMoveConfigs;
         public AspectProductionConfig[] AspectProductionConfigs;
+        public ResultConfig[] ResultConfigs;
     }
 
     [Serializable]
@@ -26,14 +27,9 @@ namespace Data
     [Serializable]
     public class GeneralConfig
     {
-        public float DailyRewardLoopSize;
-        public float MediumPerHard;
-        public float SoftPerHard;
-    }
-    [Serializable]
-    public class UnitConfig : ConfigElementBase
-    {
-        public string ViewId;
+        public float BorderScrollSpeed;
+        public float CameraRotateSpeed;
+        public float DragScrollSpeed;
     }
 
     [Serializable]
@@ -51,14 +47,41 @@ namespace Data
     public class AspectMoveConfig : ConfigElementBase
     {
         public float Speed;
+        public float Acceleration;
         public float RotationSpeed;
     }
     [Serializable]
+    public class ResultConfig : ConfigElementBase
+    {
+        public ResultType ResultType;
+        public int ResultAmount;
+    }
+
+    public enum ResultType
+    {
+        None,
+        Unit,
+        Resource,
+        Upgrade
+    }
+
+    [Serializable]
+    public class PricePair
+    {
+        public string Type;
+        public int Amount;
+    }
+
+    [Serializable]
     public class AspectProductionConfig : ConfigElementBase
     {
-        public float Duration;
-        public string ResultId;
-        public string ResultType;
-        public float ResultAmount;
+        public List<ProductionVariantConfig> ProductionVariantConfigs = new List<ProductionVariantConfig>();
+        [Serializable]
+        public class ProductionVariantConfig
+        {
+            public List<PricePair> Price = new List<PricePair>();
+            public float Duration;
+            public string ResultId;
+        }
     }
 }

@@ -58,7 +58,6 @@ namespace Services.StorageHandler
                 onGetData.Invoke(defaultData);
                 return;
             }
-            Debug.Log(obj);
 
 
             if (_jsonService.FromJson<T>(obj, out var data))
@@ -89,8 +88,6 @@ namespace Services.StorageHandler
 
             var dataSerialized = _jsonService.ToJson(data);
 
-            Debug.Log($"Saved playerPrefs profile version {v}");
-            Debug.Log(dataSerialized);
 
             PlayerPrefs.SetString(_playerPrefsDataKey,dataSerialized);
             PlayerPrefs.Save();

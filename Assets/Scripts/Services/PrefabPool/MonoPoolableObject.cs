@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
+using Views.UI.Elements;
 
 namespace Services.PrefabPool
 {
-	public class MonoPoolableObject : MonoBehaviour, IPoolableObject
+	public abstract class MonoPoolableObject : MonoBehaviour, IPoolableObject
 	{
-		protected virtual void Awake() { }
+		public virtual void Awake() { }
 
 		public virtual void OnSpawned()
 		{
@@ -19,7 +20,11 @@ namespace Services.PrefabPool
 
 		public virtual void Dispose()
 		{
-			PrefabPool.InstanceGlobal.Despawn(this);
+		}
+
+		protected void Dispose<T>(T iconButtonView) where T : MonoBehaviour, IPoolableObject
+		{
+			PrefabPool.InstanceGlobal.Despawn(iconButtonView);
 		}
 	}
 }
