@@ -20,7 +20,7 @@ namespace Rules
             messenger.Subscribe<MainSignals.EarthRightClick>(x => OnEarthRightClick(x.Click));
             messenger.Subscribe<MainSignals.SelectRequest>(OnSelectRequest);
             messenger.Subscribe<MainSignals.ContextActionRequest>(OnActionRequest);
-            messenger.Subscribe<MainSignals.HoverModelView>(OnHoverRequest);
+            messenger.Subscribe<MainSignals.HoverRequest>(OnHoverRequest);
         }
 
         private void OnEarthRightClick(Vector3 objClick)
@@ -44,9 +44,9 @@ namespace Rules
             _unitsService.SetSelected(null);
         }
 
-        private void OnHoverRequest(MainSignals.HoverModelView obj)
+        private void OnHoverRequest(MainSignals.HoverRequest obj)
         {
-            obj.Model.AspectSelection.Hovered.Value = true;
+            //obj.Model.AspectSelection.Hovered.Value = true;
         }
 
         private void OnActionRequest(MainSignals.ContextActionRequest obj)
@@ -56,12 +56,12 @@ namespace Rules
 
         private void OnSelectRequest(MainSignals.SelectRequest obj)
         {
-            if(_unitsService.CurrentUnitSelected.Value == obj.Model.AspectUnit)
+            /*if(_unitsService.CurrentUnitSelected.Value == obj.Model.AspectUnit)
                 return;
 
             ClearSelection();
             obj.Model.AspectSelection.Selected.Value = true;
-            _unitsService.SetSelected(obj.Model.AspectUnit);
+            _unitsService.SetSelected(obj.Model.AspectUnit);*/
 
         }
     }

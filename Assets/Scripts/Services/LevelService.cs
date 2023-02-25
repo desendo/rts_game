@@ -105,7 +105,7 @@ namespace Services
             {
                 var editorData = _levelEditorUnitsData[i];
                 var id = editorData.ConfigId;
-                levelSaveData.AspectsUnitSaveData.Add( new AspectUnitSaveData
+                levelSaveData.ComponentUnitSaveData.Add( new SaveDataUnit
                 {
                     Id = i,
                     ConfigId = editorData.ConfigId,
@@ -116,19 +116,19 @@ namespace Services
 
                 var attackConfig = _config.AspectAttackConfigs.FirstOrDefault(x => x.Id == id);
                 if (attackConfig != null)
-                    levelSaveData.AspectsAttackSaveData.Add(new AspectAttackSaveData(attackConfig, i));
+                    levelSaveData.ComponentAttackSaveData.Add(new SaveDataAttack(attackConfig, i));
 
                 var moveConfig = _config.AspectMoveConfigs.FirstOrDefault(x => x.Id == id);
                 if (moveConfig != null)
-                    levelSaveData.AspectsMoveSaveData.Add(new AspectMoveSaveData(i, moveConfig));
+                    levelSaveData.ComponentMoveSaveData.Add(new SaveDataMove(i, moveConfig));
 
                 var healthConfig = _config.AspectHealthConfigs.FirstOrDefault(x => x.Id == id);
                 if (healthConfig != null)
-                    levelSaveData.AspectsHealthSaveData.Add(new AspectHealthSaveData(i, healthConfig));
+                    levelSaveData.ComponentHealthSaveData.Add(new SaveDataHealth(i, healthConfig));
 
                 var productionConfig = _config.AspectProductionConfigs.FirstOrDefault(x => x.Id == id);
                 if (productionConfig != null)
-                    levelSaveData.AspectsProductionSaveData.Add(new AspectProductionSaveData(i, productionConfig));
+                    levelSaveData.ComponentProductionSchemaSaveData.Add(new SaveDataProductionSchema(i, productionConfig));
 
             }
             return levelSaveData;

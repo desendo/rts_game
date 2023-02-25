@@ -35,24 +35,24 @@ namespace Signals
         }
         public class SelectRequest : ISignal
         {
-            public UnitCompositionBase Model { get; }
-            public SelectRequest(UnitCompositionBase model)
+            public int Model { get; }
+            public SelectRequest(int model)
             {
                 Model = model;
             }
         }
-        public class HoverModelView : ISignal
+        public class HoverRequest : ISignal
         {
-            public UnitCompositionBase Model { get; }
-            public HoverModelView(UnitCompositionBase model)
+            public int Model { get; }
+            public HoverRequest(int entity)
             {
-                Model = model;
+                Model = entity;
             }
         }
         public class ContextActionRequest : ISignal
         {
-            public UnitCompositionBase Model { get; }
-            public ContextActionRequest(UnitCompositionBase model)
+            public int Model { get; }
+            public ContextActionRequest(int model)
             {
                 Model = model;
             }

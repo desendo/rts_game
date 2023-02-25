@@ -18,7 +18,7 @@ namespace Models.Aspects
         {
         }
 
-        public AspectProduction(AspectProductionSaveData save)
+        public AspectProduction(SaveDataProductionSchema save)
         {
             ProductionVariants = new ProductionVariant[save.ProductionVariants.Length];
             for (var i = 0; i < save.ProductionVariants.Length; i++)

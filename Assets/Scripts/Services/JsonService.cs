@@ -1,6 +1,6 @@
 ﻿#nullable enable
 using System;
-using Newtonsoft.Json;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 
 namespace Services

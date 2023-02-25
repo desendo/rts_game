@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Services;
 using UniRx;
 using UnityEngine;
 
@@ -117,6 +116,19 @@ namespace Locator
                         }
                     }
                 }
+            }
+            else
+            {
+                Debug.LogWarning($"duplicate container add {type} interfaces. skipping.");
+            }
+        }
+        public static void AddExplicit<T>(T existing) where T : class
+        {
+            var type = typeof(T);
+
+            if (!_instancesByType.ContainsKey(type))
+            {
+                _instancesByType.Add(type, existing);
             }
             else
             {

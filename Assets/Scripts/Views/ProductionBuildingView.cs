@@ -1,4 +1,6 @@
+using Leopotam.EcsLite;
 using Locator;
+using Models.Components;
 using Services;
 using Services.PrefabPool;
 using Signals;
@@ -9,32 +11,30 @@ using UnityEngine.EventSystems;
 
 namespace Views
 {
-    public class UnitView : MonoPoolableObject, IPointerClickHandler, IModelView
+    public class UnitView : MonoPoolableObject, IPointerClickHandler, IModelView,ISelect
     {
         [SerializeField] private Collider _collider;
         [SerializeField] private GameObject _selected;
         [SerializeField] private GameObject _hovered;
         //[SerializeField] private GameObject _actioned;
         private GameMessenger _messenger;
-        private UnitCompositionBase _model;
 
         protected readonly CompositeDisposable _sup = new CompositeDisposable();
-        private int _index;
+        private int _entity;
+        private EcsWorld _world;
+        private ISelect _selectImplementation;
+        private bool _selectEnabled;
+        public int Entity => _entity;
 
-        public int Index => _index;
-
-        public virtual UnitCompositionBase Model => _model;
-        public virtual void Bind(UnitCompositionBase model)
+        public void Bind(int entity)
         {
-            _index = model.AspectUnit.UnitIndex;
-            _model = model;
-            model.AspectSelection.Hovered.Subscribe(b => { _hovered.SetActive(b);}).AddTo(_sup);
-            model.AspectSelection.Selected.Subscribe(b => { _selected.SetActive(b);}).AddTo(_sup);
-            transform.position = model.AspectUnit.Position.Value;
-            transform.rotation = model.AspectUnit.Rotation.Value;
-            //model.AspectSelection.Actioned.Subscribe(b => { _actioned.SetActive(b);}).AddTo(_sup);
-        }
+            _world = Container.Get<EcsWorld>();
+            _entity = entity;
+            var unit = _world.GetPool<ComponentUnit>().Get(_entity);
+            ref var tr = ref _world.GetPool<ComponentTransform>().Get(_entity);
+            ref var sel = ref _world.GetPool<ComponentSelection>().Get(_entity);
 
+        }
         public override void Awake()
         {
             base.Awake();
@@ -45,11 +45,11 @@ namespace Views
         {
             if (eventData.button == PointerEventData.InputButton.Left)
             {
-                _messenger.Fire(new MainSignals.SelectRequest(_model));
+                _messenger.Fire(new MainSignals.SelectRequest(_entity));
             }
             if (eventData.button == PointerEventData.InputButton.Right)
             {
-                _messenger.Fire(new MainSignals.ContextActionRequest(_model));
+                _messenger.Fire(new MainSignals.ContextActionRequest(_entity));
             }
         }
 
@@ -71,12 +71,23 @@ namespace Views
         {
             _sup.Clear();
         }
+
+
+        public void SetSelected(bool selected)=> _selected.SetActive(selected);
+        public void SetHovered(bool hovered) => _hovered.SetActive(hovered);
+
+
+    }
+
+    public interface ISelect
+    {
+        void SetSelected(bool selected);
+        void SetHovered(bool hovered);
     }
 
     public interface IModelView
     {
-        public int Index { get; }
-        UnitCompositionBase Model { get; }
-        void Bind(UnitCompositionBase model);
+        int Entity { get; }
+
     }
 }

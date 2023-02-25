@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Models;
 using Models.Aspects;
+using Models.Components;
 using Services.StorageHandler;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Data
 {
@@ -31,13 +33,13 @@ namespace Data
     public class LevelSaveData
     {
         public bool IsValid;
-        public List<AspectUnitSaveData> AspectsUnitSaveData = new List<AspectUnitSaveData>();
-        public List<AspectMoveSaveData> AspectsMoveSaveData = new List<AspectMoveSaveData>();
-        public List<AspectAttackSaveData> AspectsAttackSaveData = new List<AspectAttackSaveData>();
-        public List<AspectHealthSaveData> AspectsHealthSaveData = new List<AspectHealthSaveData>();
-        public List<AspectProductionSaveData> AspectsProductionSaveData = new List<AspectProductionSaveData>();
-        public List<AspectQueueSaveData> AspectsQueueSaveData = new List<AspectQueueSaveData>();
-        public List<AspectMoveTargetSaveData> AspectsMoveTargetSaveData = new List<AspectMoveTargetSaveData>();
+        public List<SaveDataUnit> ComponentUnitSaveData = new List<SaveDataUnit>();
+        public List<SaveDataMove> ComponentMoveSaveData = new List<SaveDataMove>();
+        public List<SaveDataAttack> ComponentAttackSaveData = new List<SaveDataAttack>();
+        public List<SaveDataHealth> ComponentHealthSaveData = new List<SaveDataHealth>();
+        public List<SaveDataProductionSchema> ComponentProductionSchemaSaveData = new List<SaveDataProductionSchema>();
+        public List<SaveDataProductionQueue> ComponentProductionQueueSaveData = new List<SaveDataProductionQueue>();
+        public List<SaveDataMoveTarget> ComponentMoveTargetSaveData = new List<SaveDataMoveTarget>();
         public CameraSaveData CameraData;
     }
 
@@ -51,15 +53,17 @@ namespace Data
     }
 
     [System.Serializable]
-    public class AspectUnitSaveData
+    public class SaveDataUnit
     {
         public int Id;
         public string ConfigId;
         public int PlayerIndex;
         public Vector3 Position;
         public float Rotation;
+        public bool Selected;
+        public bool Selectable;
 
-        public AspectUnitSaveData(int id, string configId, int playerIndex, Vector3 position, float rotation)
+        public SaveDataUnit(int id, string configId, int playerIndex, Vector3 position, float rotation)
         {
             Id = id;
             ConfigId = configId;
@@ -68,7 +72,7 @@ namespace Data
             Rotation = rotation;
         }
 
-        public AspectUnitSaveData(int id, AspectUnit aspectUnit)
+        public SaveDataUnit(int id, AspectUnit aspectUnit)
         {
             Id = id;
             ConfigId = aspectUnit.ConfigId;
@@ -77,52 +81,55 @@ namespace Data
             Rotation = aspectUnit.Rotation.Value.eulerAngles.y;
         }
 
-        public AspectUnitSaveData()
+        public SaveDataUnit()
         {
         }
     }
     [System.Serializable]
-    public class AspectMoveSaveData
+    public class SaveDataMove
     {
         public int Id;
         public float Speed;
         public float RotationSpeed;
         public float Acceleration;
 
-        public AspectMoveSaveData(int i, AspectMoveConfig moveConfig)
+        public SaveDataMove(int i, AspectMoveConfig moveConfig)
         {
             Id = i;
             Speed = moveConfig.Speed;
             RotationSpeed = moveConfig.RotationSpeed;
             Acceleration = moveConfig.Acceleration;
         }
-        public AspectMoveSaveData(int i, AspectMove move)
+
+        public SaveDataMove()
+        {
+        }
+
+        public SaveDataMove(in int i, ComponentMove move)
         {
             Id = i;
-            Speed = move.Speed.Value;
-            RotationSpeed = move.RotationSpeed.Value;
-            Acceleration = move.Acceleration.Value;
-        }
-        public AspectMoveSaveData()
-        {
+            Speed = move.MoveSpeed;
+            RotationSpeed = move.RotationSpeed;
+            Acceleration = move.MoveAcc;
+            
         }
     }
     [System.Serializable]
-    public class AspectAttackSaveData
+    public class SaveDataAttack
     {
         public int Id;
         public float Damage;
         public float Delay;
-        public AspectAttackSaveData()
+        public SaveDataAttack()
         {
         }
-        public AspectAttackSaveData(AspectAttackConfig config, int i)
+        public SaveDataAttack(AspectAttackConfig config, int i)
         {
             Damage = config.Damage;
             Delay = config.Delay;
             Id = i;
         }
-        public AspectAttackSaveData(AspectAttack aspectAttack, int i)
+        public SaveDataAttack(AspectAttack aspectAttack, int i)
         {
             Damage = aspectAttack.Damage.Value;
             Delay = aspectAttack.Delay.Value;
@@ -132,23 +139,23 @@ namespace Data
 
     }
     [System.Serializable]
-    public class AspectHealthSaveData
+    public class SaveDataHealth
     {
         public int Id;
         public float Current;
         public float Max;
 
-        public AspectHealthSaveData()
+        public SaveDataHealth()
         {
         }
 
-        public AspectHealthSaveData(int id, AspectHealthConfig config)
+        public SaveDataHealth(int id, AspectHealthConfig config)
         {
             Id = id;
             Current = config.Max;
             Max = config.Max;
         }
-        public AspectHealthSaveData(int id, AspectHealth health)
+        public SaveDataHealth(int id, AspectHealth health)
         {
             Id = id;
             Current = health.Current.Value;
@@ -157,57 +164,63 @@ namespace Data
     }
 
     [System.Serializable]
-    public class AspectMoveTargetSaveData
+    public class SaveDataMoveTarget
     {
         public Vector3 Target;
         public int Id;
-        public AspectMoveTargetSaveData(int id, AspectMoveTarget aspect)
+        public SaveDataMoveTarget(int id, AspectMoveTarget aspect)
         {
             Id = id;
             Target = aspect.Target;
         }
 
-        public AspectMoveTargetSaveData()
+        public SaveDataMoveTarget()
         {
+        }
+
+        public SaveDataMoveTarget(in int id, ComponentMoveTarget component)
+        {
+            Id = id;
+            Target = component.Target;
         }
     }
 
     [System.Serializable]
-    public class AspectQueueSaveData
+    public class SaveDataProductionQueue
     {
         public int Id;
         public string[] List;
 
-        public AspectQueueSaveData(int id, AspectQueue queue)
+        public SaveDataProductionQueue(int id, ComponentProductionQueue queue)
         {
             Id = id;
-            List = queue.List.ToArray();
+            List = queue.Queue.ToArray();
         }
 
-        public AspectQueueSaveData()
+        public SaveDataProductionQueue()
         {
             List = new string[0];
         }
     }
 
     [System.Serializable]
-    public class AspectProductionSaveData
+    public class SaveDataProductionSchema
     {
         public int Id;
-        public ProductionVariantSaveData[] ProductionVariants;
-        public AspectProductionSaveData()
+        public ProductionVariant[] ProductionVariants;
+        public SaveDataProductionSchema()
         {
-            ProductionVariants = new ProductionVariantSaveData[0];
+            ProductionVariants = new ProductionVariant[0];
         }
 
-        public AspectProductionSaveData(int id, AspectProductionConfig config)
+        public SaveDataProductionSchema(int id, ProductionSchemaConfig schemaConfig)
         {
             Id = id;
-            ProductionVariants = new ProductionVariantSaveData[config.ProductionVariantConfigs.Count];
-            for (var index = 0; index < config.ProductionVariantConfigs.Count; index++)
+            ProductionVariants = new ProductionVariant[schemaConfig.ProductionVariantConfigs.Count];
+            for (var index = 0; index < schemaConfig.ProductionVariantConfigs.Count; index++)
             {
-                var variantConfig = config.ProductionVariantConfigs[index];
-                ProductionVariants[index] = new ProductionVariantSaveData()
+                var variantConfig = schemaConfig.ProductionVariantConfigs[index];
+                ProductionVariants[index] = new ProductionVariant()
                 {
                     PriceAmount = variantConfig.Price.Select(x=>x.Amount).ToArray(),
                     PriceType = variantConfig.Price.Select(x=>x.Type).ToArray(),
@@ -216,26 +229,15 @@ namespace Data
                 };
             }
         }
-        public AspectProductionSaveData(int id, AspectProduction aspect)
+        public SaveDataProductionSchema(int id, AspectProduction aspect)
         {
             Id = id;
-            ProductionVariants = new ProductionVariantSaveData[aspect.ProductionVariants.Length];
+            ProductionVariants = new ProductionVariant[aspect.ProductionVariants.Length];
 
             for (var i = 0; i < aspect.ProductionVariants.Length; i++)
             {
                 var variant = aspect.ProductionVariants[i];
-                var prices = new List<PricePair>();
-                for (var i1 = 0; i1 < variant.PricesAmount.Length; i1++)
-                {
-                    prices.Add(new PricePair()
-                    {
-                        Amount = variant.PricesAmount[i1],
-                        Type = variant.PricesTypes[i1],
-
-                    });
-                }
-
-                ProductionVariants[i] = new ProductionVariantSaveData()
+                ProductionVariants[i] = new ProductionVariant()
                 {
                     Duration = variant.Duration,
                     PriceAmount = variant.PricesAmount,
@@ -247,13 +249,31 @@ namespace Data
             }
         }
 
-        [System.Serializable]
-        public class ProductionVariantSaveData
+        public SaveDataProductionSchema(in int id, ComponentProductionSchema c1)
         {
-            public int[] PriceAmount;
-            public string[] PriceType;
-            public float Duration;
-            public string ResultId;
+            ProductionVariants = new ProductionVariant[c1.Variants.Length];
+
+            for (var i = 0; i < c1.Variants.Length; i++)
+            {
+                var variant = c1.Variants[i];
+                ProductionVariants[i] = new ProductionVariant()
+                {
+                    Duration = variant.Duration,
+                    PriceAmount = variant.PriceAmount,
+                    PriceType = variant.PriceType,
+                    ResultId = variant.ResultId
+                };
+
+            }
+
         }
+    }
+    [System.Serializable]
+    public class ProductionVariant
+    {
+        public int[] PriceAmount;
+        public string[] PriceType;
+        public float Duration;
+        public string ResultId;
     }
 }

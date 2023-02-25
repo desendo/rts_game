@@ -10,7 +10,7 @@ namespace Data
         public AspectHealthConfig[] AspectHealthConfigs;
         public AspectAttackConfig[] AspectAttackConfigs;
         public AspectMoveConfig[] AspectMoveConfigs;
-        public AspectProductionConfig[] AspectProductionConfigs;
+        public ProductionSchemaConfig[] AspectProductionConfigs;
         public ResultConfig[] ResultConfigs;
     }
 
@@ -73,15 +73,16 @@ namespace Data
     }
 
     [Serializable]
-    public class AspectProductionConfig : ConfigElementBase
+    public class ProductionSchemaConfig : ConfigElementBase
     {
         public List<ProductionVariantConfig> ProductionVariantConfigs = new List<ProductionVariantConfig>();
-        [Serializable]
-        public class ProductionVariantConfig
-        {
-            public List<PricePair> Price = new List<PricePair>();
-            public float Duration;
-            public string ResultId;
-        }
+
+    }
+    [Serializable]
+    public class ProductionVariantConfig
+    {
+        public List<PricePair> Price = new List<PricePair>();
+        public float Duration;
+        public string ResultId;
     }
 }

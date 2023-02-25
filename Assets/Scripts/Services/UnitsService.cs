@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using Data;
+using Leopotam.EcsLite;
 using Locator;
 using Models.Aspects;
+using Models.Components;
 using Services.PrefabPool;
 using UniRx;
 using UnityEngine;
@@ -22,8 +24,6 @@ namespace Services
     {
         IReadOnlyReactiveProperty<AspectUnit> CurrentUnitSelected { get; }
         void SetSelected(AspectUnit unit);
-        List<UnitView> UnitViews { get; }
-        void CreateUnit(Vector3 pos, string configId, List<Vector3> initialPath);
 
     }
 
@@ -31,120 +31,152 @@ namespace Services
     {
         private readonly ReactiveProperty<AspectUnit> _selected = new ReactiveProperty<AspectUnit>();
 
-        private readonly List<UnitView> _spawnedViews = new List<UnitView>();
+        private readonly List<MonoPoolableObject> _spawnedViews = new List<MonoPoolableObject>();
         private readonly ReactiveProperty<bool> _viewsIsSpawned = new ReactiveProperty<bool>();
         private readonly DataContainer<VisualData> _visualData;
-        private GameConfigData _config;
-        public List<UnitView> UnitViews => _spawnedViews;
+        private readonly EcsWorld _world;
+        private readonly EcsFilter _unitFilter;
+        public IReadOnlyReactiveProperty<bool> ViewsIsSpawned => _viewsIsSpawned;
 
         public UnitsService()
         {
             _visualData = Container.Get<DataContainer<VisualData>>();
-            _config = Container.Get<DataContainer<GameConfigData>>().Data;
+            _world = Container.Get<EcsWorld>();
+            _unitFilter = _world.Filter<ComponentUnit>().Inc<ComponentTransform>().End();
         }
 
         public void SaveData(LevelSaveData data)
         {
-            data.AspectsUnitSaveData.Clear();
-            for (var i = 0; i < Storage<AspectUnit>.Instance.Aspects.Length; i++)
+            data.ComponentUnitSaveData.Clear();
+            _world.GetPool<ComponentUnit>();
+            var filter = _world.Filter<ComponentUnit>().Inc<ComponentTransform>().Inc<ComponentSelection>().End();
+            foreach (var i in filter)
             {
-                var aspect = i.Get<AspectUnit>();
-                if (aspect == null)
-                    continue;
+                var c1 = _world.GetPool<ComponentUnit>().Get(i);
+                var c2 = _world.GetPool<ComponentTransform>().Get(i);
+                var c3 = _world.GetPool<ComponentSelection>().Get(i);
 
-                data.AspectsUnitSaveData.Add(new AspectUnitSaveData(i, aspect));
-            }
-
-            data.AspectsMoveSaveData.Clear();
-            for (var i = 0; i < Storage<AspectMove>.Instance.Aspects.Length; i++)
-            {
-                var aspect = Storage<AspectMove>.Instance.Aspects[i];
-                if (aspect != null)
-                    data.AspectsMoveSaveData.Add(new AspectMoveSaveData(i, aspect));
-            }
-
-            data.AspectsProductionSaveData.Clear();
-            for (var i = 0; i < Storage<AspectProduction>.Instance.Aspects.Length; i++)
-            {
-                var aspect = Storage<AspectProduction>.Instance.Aspects[i];
-                if (aspect != null)
-                    data.AspectsProductionSaveData.Add(new AspectProductionSaveData(i, aspect));
+                data.ComponentUnitSaveData.Add(new SaveDataUnit()
+                {
+                    Id = i,
+                    Position = c2.Position,
+                    Rotation = c2.Rotation.eulerAngles.y,
+                    ConfigId = c1.ConfigId,
+                    PlayerIndex = c1.PlayerIndex,
+                    Selected = c3.Selected,
+                    Selectable = c3.Selectable,
+                });
             }
 
-            data.AspectsQueueSaveData.Clear();
-            for (var i = 0; i < Storage<AspectQueue>.Instance.Aspects.Length; i++)
+            var filter1 = _world.Filter<ComponentMove>().End();
+            data.ComponentMoveSaveData.Clear();
+            foreach (var i in filter1)
             {
-                var aspect = Storage<AspectQueue>.Instance.Aspects[i];
-                if (aspect != null)
-                    data.AspectsQueueSaveData.Add(new AspectQueueSaveData(i, aspect));
+                var c1 = _world.GetPool<ComponentMove>().Get(i);
+                data.ComponentMoveSaveData.Add(new SaveDataMove(i,c1));
             }
-            data.AspectsMoveTargetSaveData.Clear();
-            for (var i = 0; i < Storage<AspectMoveTarget>.Instance.Aspects.Length; i++)
+
+            var filter2 = _world.Filter<ComponentProductionSchema>().End();
+            data.ComponentProductionSchemaSaveData.Clear();
+            foreach (var i in filter2)
             {
-                var aspect = Storage<AspectMoveTarget>.Instance.Aspects[i];
-                if (aspect != null)
-                    data.AspectsMoveTargetSaveData.Add(new AspectMoveTargetSaveData(i, aspect));
+                var c1 = _world.GetPool<ComponentProductionSchema>().Get(i);
+                data.ComponentProductionSchemaSaveData.Add(new SaveDataProductionSchema(i, c1));
             }
+
+            var filter3 = _world.Filter<ComponentProductionQueue>().End();
+            data.ComponentProductionQueueSaveData.Clear();
+            foreach (var i in filter3)
+            {
+                var c1 = _world.GetPool<ComponentProductionQueue>().Get(i);
+                data.ComponentProductionQueueSaveData.Add(new SaveDataProductionQueue(i,c1));
+            }
+
+            var filter4 = _world.Filter<ComponentMoveTarget>().End();
+            data.ComponentMoveTargetSaveData.Clear();
+            foreach (var i in filter3)
+            {
+                var c1 = _world.GetPool<ComponentMoveTarget>().Get(i);
+                data.ComponentMoveTargetSaveData.Add(new SaveDataMoveTarget(i,c1));
+            }
+
         }
 
         public void LoadData(LevelSaveData data)
         {
-            foreach (var save in data.AspectsUnitSaveData)
+
+            foreach (var save in data.ComponentUnitSaveData)
             {
-                save.Id.Set<AspectUnit>(new AspectUnit(save));
-                Storage<AspectSelection>.Instance.Set(new AspectSelection(), save.Id);
+                var entity = _world.NewEntity();
+
+                var pool = _world.GetPool<ComponentUnit>();
+                ref var c1 = ref pool.Add(entity);
+                c1.ConfigId = save.ConfigId;
+                c1.PlayerIndex = save.PlayerIndex;
+                c1.IsUser = true;
+
+                ref var c2 = ref _world.GetPool<ComponentTransform>().Add(entity);
+                c2.Position = save.Position;
+                c2.Rotation = Quaternion.Euler(0,save.Rotation,0);
+
+                ref var c3 = ref _world.GetPool<ComponentSelection>().Add(entity);
+                c3.Selectable = save.Selectable;
+                c3.Selected = save.Selected;
             }
 
-            foreach (var save in data.AspectsProductionSaveData)
+            foreach (var save in data.ComponentProductionSchemaSaveData)
             {
-                save.Id.Set<AspectProduction>(new AspectProduction(save));
+                var pool1 = _world.GetPool<ComponentProductionSchema>();
+                foreach (var e in _unitFilter)
+                {
+                    if (save.Id == e)
+                    {
+                        ref var c1 = ref pool1.Add(e);
+                        c1.Variants = save.ProductionVariants;
+                    }
+
+                }
             }
 
-            foreach (var save in data.AspectsQueueSaveData)
+            foreach (var save in data.ComponentMoveSaveData)
             {
-                save.Id.Set<AspectQueue>(new AspectQueue(save));
             }
-            foreach (var save in data.AspectsMoveTargetSaveData)
+            foreach (var save in data.ComponentProductionSchemaSaveData)
             {
-                save.Id.Set<AspectMoveTarget>(new AspectMoveTarget(save));
-            }
-            foreach (var save in data.AspectsMoveSaveData)
-            {
-                save.Id.Set<AspectMove>(new AspectMove(save));
             }
         }
 
-        public IReadOnlyReactiveProperty<bool> ViewsIsSpawned => _viewsIsSpawned;
 
         public void SpawnViews()
         {
-            var units = Filter<AspectUnit, AspectSelection>.Instance.IndexList;
-            for (var i = 0; i < units.Count; i++)
+            
+            var filter = _world.Filter<ComponentUnit>().Inc<ComponentTransform>().Inc<ComponentSelection>().End();
+
+            foreach (var i in filter)
             {
-                if (i.Has<AspectProduction>())
-                {
-                    var composition = new CompositionUnitFactory(units[i]);
-                    var view = CreateView(composition);
-                    _spawnedViews.Add(view);
-                }
-                else
-                {
-                    var composition = new UnitCompositionBase(units[i]);
-                    var view = CreateView(composition);
-                    _spawnedViews.Add(view);
-                }
+                var unit = _world.GetPool<ComponentUnit>().Get(i);
+                var tr = _world.GetPool<ComponentTransform>().Get(i);
+                var selection = _world.GetPool<ComponentSelection>().Get(i);
+                var view = CreateView(unit, tr);
             }
 
-            /*foreach (var unitModelBase in _player1Units)
+        }
+
+        private UnitView CreateView(ComponentUnit unit, in ComponentTransform tr)
+        {
+            var id = unit.ConfigId;
+            var prefab = _visualData.Data.GetView(id);
+            if (prefab == null)
             {
-                var view = CreateView(unitModelBase);
-                _spawnedViews.Add(view);
+                Debug.LogError($"missing prefab id {id}");
+                return null;
             }
-            foreach (var unitModelBase in _player2Units)
-            {
-                var view = CreateView(unitModelBase);
-                _spawnedViews.Add(view);
-            }*/
+
+            var view = PrefabPool.PrefabPool.InstanceGlobal.Spawn(prefab);
+            view.transform.position = tr.Position;
+            view.Bind(unit.UnitIndex);
+
+            return view;
         }
 
         public void DeSpawnViews()
@@ -158,30 +190,6 @@ namespace Services
             _viewsIsSpawned.Value = val;
         }
 
-        public void CreateUnit(Vector3 pos, string configId, List<Vector3> initialPath)
-        {
-            var composition = new UnitCompositionBase();
-            var aspectUnit = new AspectUnit();
-            aspectUnit.Position.Value = pos;
-            aspectUnit.Rotation.Value = Quaternion.LookRotation(initialPath[1] - initialPath[0]);
-            aspectUnit.ConfigId = configId;
-            var newIndex = Storage<AspectUnit>.Instance.Add(aspectUnit);
-            aspectUnit.UnitIndex = newIndex;
-            var moveConfig = _config.AspectMoveConfigs.FirstOrDefault(x => x.Id == configId);
-            newIndex.Set(new AspectMove(new AspectMoveSaveData()
-            {
-                Acceleration = moveConfig.Acceleration,
-                Id = newIndex,
-                Speed = moveConfig.Speed,
-                RotationSpeed = moveConfig.RotationSpeed
-            }));
-
-            composition.AspectUnit = aspectUnit;
-            composition.AspectSelection = newIndex.Set(new AspectSelection());
-            var view = CreateView(composition);
-            _spawnedViews.Add(view);
-        }
-
         public void Tick(float dt)
         {
         }
@@ -193,46 +201,6 @@ namespace Services
             _selected.Value = unit;
         }
 
-        private UnitView CreateView(UnitCompositionBase composition)
-        {
-            var id = composition.AspectUnit.ConfigId;
-            var prefab = _visualData.Data.GetView(id);
-            if (prefab == null)
-            {
-                Debug.LogError($"missing prefab id {id}");
-                return null;
-            }
-
-            var view = PrefabPool.PrefabPool.InstanceGlobal.Spawn(prefab);
-            view.Bind(composition);
-
-            return view;
-        }
-
-        public class CompositionUnitFactory : UnitCompositionBase
-        {
-            public AspectProduction AspectProduction;
-            public CompositionUnitFactory(int i) : base(i)
-            {
-                AspectProduction = Storage<AspectProduction>.Instance.Aspects[i];
-            }
-        }
-    }
-
-    public class UnitCompositionBase
-    {
-        public AspectSelection AspectSelection;
-        public AspectUnit AspectUnit;
-
-        public UnitCompositionBase(int i)
-        {
-            AspectUnit = Storage<AspectUnit>.Instance.Aspects[i];
-            AspectSelection = Storage<AspectSelection>.Instance.Aspects[i];
-        }
-
-        public UnitCompositionBase()
-        {
-        }
     }
 
 
@@ -252,10 +220,7 @@ namespace Services
         {
             Storage<T>.Instance.Remove(index);
         }
-        public static void Remove(this in int index)
-        {
-            //Storage.RemoveAll(index);
-        }
+
         public static bool Has<T>(this in int index) where T : class
         {
             return Storage<T>.Instance.Has(index);

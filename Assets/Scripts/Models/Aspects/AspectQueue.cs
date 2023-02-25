@@ -12,7 +12,7 @@ namespace Models.Aspects
         public AspectQueue()
         {
         }
-        public AspectQueue(AspectQueueSaveData saveData)
+        public AspectQueue(SaveDataProductionQueue saveData)
         {
             List = new List<string>(saveData.List);
             OnChange.OnNext(Unit.Default);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Data;
+using Leopotam.EcsLite;
 using Locator;
 using Services;
 using Signals;
@@ -27,6 +28,7 @@ namespace Rules
         private readonly ISceneLoadService _sceneLoadService;
         private readonly ILevelService _levelService;
 
+        private EcsWorld _world;
         public GameLoadRule()
         {
             _sceneLoadService = Container.Get<ISceneLoadService>();
@@ -38,6 +40,8 @@ namespace Rules
             _gameStateService = Container.Get<IGameStateService>();
             _playerDataInitializers = Container.GetList<IDataHandler<PlayerData>>();
             _levelSaveDataInitializers = Container.GetList<IDataHandler<LevelSaveData>>();
+
+            _world = Container.Get<EcsWorld>();
 
             _messenger = Container.Get<GameMessenger>();
             _messenger.Subscribe<MainSignals.ResetGameRequest>(x => Load(true));
@@ -54,6 +58,7 @@ namespace Rules
 
         private void Load(bool isReset = false)
         {
+
             _gameStateService.SetState(GameStateService.State.Loading);
             _spawns.ForEach(x=>x.DeSpawnViews());
             _spawns.ForEach(x=>x.SetSpawned(false));

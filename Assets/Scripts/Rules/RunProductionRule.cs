@@ -52,7 +52,6 @@ namespace Rules
             var exitPath = index.Get<AspectUnitExitPath>();
             if (resultConfig != null && resultConfig.ResultType == ResultType.Unit && exitPath != null)
             {
-                _unitsService.CreateUnit(exitPath.Path[0], result, exitPath.Path);
             }
         }
     }

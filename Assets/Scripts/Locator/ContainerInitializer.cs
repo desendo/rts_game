@@ -1,4 +1,5 @@
 using Data;
+using Leopotam.EcsLite;
 using Rules;
 using Services;
 using Services.StorageHandler;
@@ -14,6 +15,9 @@ namespace Locator
         [SerializeField] private DataContainer<VisualData> _visualData;
 
         private static ContainerInitializer _instance;
+        private EcsWorld _escWorld;
+        private EcsSystems _systems;
+
         private void Awake()
         {
             if (_instance != null)
@@ -24,12 +28,24 @@ namespace Locator
             DontDestroyOnLoad(this);
             _instance = this;
 
+            _escWorld = new EcsWorld();
+            _systems = new EcsSystems(_escWorld);
+
+            Container.AddExplicit(_escWorld);
+            Container.AddExplicit(_systems);
             AddDataContainers();
             AddServices();
             AddRules();
+            AddSystems();
 
             Container.SetAddComplete(true);
+            _systems.Init();
             Container.Init();
+        }
+
+        private void AddSystems()
+        {
+            //_systems.Add()
         }
 
         private void AddDataContainers()
@@ -77,6 +93,7 @@ namespace Locator
 
         private void Update()
         {
+            _systems.Run();
             Container.UpdateLoop(Time.deltaTime);
         }
 

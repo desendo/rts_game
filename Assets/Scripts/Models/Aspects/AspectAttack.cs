@@ -8,7 +8,7 @@ namespace Models.Aspects
         public readonly ReactiveProperty<float> Delay = new ReactiveProperty<float>();
         public readonly ReactiveProperty<float> Damage = new ReactiveProperty<float>();
 
-        public AspectAttack(AspectAttackSaveData data)
+        public AspectAttack(SaveDataAttack data)
         {
             Delay.Value = data.Delay;
             Damage.Value = data.Damage;

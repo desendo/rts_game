@@ -7,7 +7,7 @@ namespace Models.Aspects
     {
         public Vector3 Target;
 
-        public AspectMoveTarget(AspectMoveTargetSaveData save)
+        public AspectMoveTarget(SaveDataMoveTarget save)
         {
             Target = save.Target;
         }

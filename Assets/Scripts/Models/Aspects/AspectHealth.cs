@@ -8,7 +8,7 @@ namespace Models.Aspects
         public readonly ReactiveProperty<float> Max = new ReactiveProperty<float>();
         public readonly ReactiveProperty<float> Current = new ReactiveProperty<float>();
 
-        public AspectHealth(AspectHealthSaveData data)
+        public AspectHealth(SaveDataHealth data)
         {
             Max.Value = data.Max;
             Current.Value = data.Current;
