@@ -12,6 +12,7 @@ namespace Models.Aspects
     public class AspectProduction
     {
         public ProductionVariant[] ProductionVariants;
+        public int Id;
 
         public AspectProduction()
         {
@@ -22,6 +23,7 @@ namespace Models.Aspects
             ProductionVariants = new ProductionVariant[save.ProductionVariants.Length];
             for (var i = 0; i < save.ProductionVariants.Length; i++)
             {
+                Id = i;
                 var variant = save.ProductionVariants[i];
                 ProductionVariants[i] = new ProductionVariant()
                 {

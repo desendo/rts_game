@@ -28,6 +28,7 @@ namespace Views.UI.Displays
         private readonly CompositeDisposable _sup = new CompositeDisposable();
         private IDisposable _queueUpdateSup;
         private IDisposable _removeProcessSup;
+        private int _unitSelected;
 
         private void Awake()
         {
@@ -46,8 +47,11 @@ namespace Views.UI.Displays
                 _icon.enabled = false;
                 ClearIcons();
                 _sup?.Clear();
+                _unitSelected = -1;
                 return;
             }
+
+            _unitSelected = obj.UnitIndex;
 
             _icon.enabled = true;
 
@@ -56,68 +60,78 @@ namespace Views.UI.Displays
             if (sprite != null)
                 _icon.sprite = sprite;
 
-            var production = obj.UnitIndex.Get<AspectProduction>();
+            var production = _unitSelected.Get<AspectProduction>();
+            for (var index = 0; index < Storage<AspectProduction>.Instance.Aspects.Length; index++)
+            {
+                var aspectProduction = Storage<AspectProduction>.Instance.Aspects[index];
+            }
+
             if (production != null)
             {
-                foreach (var variant in production?.ProductionVariants)
+                foreach (var variant in production.ProductionVariants)
                 {
                     var icon = PrefabPool.InstanceGlobal.Spawn(_visualData.IconButtonView, _actionIconsParent);
                     _iconsList.Add(icon);
-                    icon.Bind(variant.ResultId, new MainSignals.ProductionEnqueueRequest(variant.ResultId, obj.UnitIndex));
+                    icon.Bind(variant.ResultId, new MainSignals.ProductionEnqueueRequest(variant.ResultId, _unitSelected));
                 }
             }
 
             ClearCurrentProgress();
-            HandleCurrentProgressChanged(obj.UnitIndex);
+            HandleCurrentProgressChanged(_unitSelected);
             Filter<AspectProductionProcess, AspectQueue>.Instance.OnChange.Subscribe(filter =>
             {
                 ClearCurrentProgress();
-                if (filter.IndexHash.Contains(obj.UnitIndex))
-                    HandleCurrentProgressChanged(obj.UnitIndex);
+                if (filter.IndexHash.Contains(_unitSelected))
+                    HandleCurrentProgressChanged(_unitSelected);
             }).AddTo(_sup);
 
             Filter<AspectUnit, AspectQueue>.Instance.OnChange.Subscribe(filter =>
             {
-                if (filter.IndexHash.Contains(obj.UnitIndex))
-                    UpdateQueueView(obj.UnitIndex);
+                if (filter.IndexHash.Contains(_unitSelected))
+                    UpdateQueueView(_unitSelected);
 
             }).AddTo(_sup);
-            if(Filter<AspectUnit, AspectQueue>.Instance.IndexHash.Contains(obj.UnitIndex))
-                UpdateQueueView(obj.UnitIndex);
+            if(Filter<AspectUnit, AspectQueue>.Instance.IndexHash.Contains(_unitSelected))
+                UpdateQueueView(_unitSelected);
 
         }
 
 
-        private void HandleCurrentProgressChanged(int obj)
+        private void HandleCurrentProgressChanged(int i)
         {
-            var productionProcess = obj.Get<AspectProductionProcess>();
+
+            var productionProcess = i.Get<AspectProductionProcess>();
             if (productionProcess != null)
             {
                 _current = PrefabPool.InstanceGlobal.Spawn(_visualData.IconButtonView, _currentParent);
                 _current.Bind(productionProcess.ResultId, productionProcess.CurrentTime, productionProcess.MaxTime,
-                    new MainSignals.ProductionCancelRequest(productionProcess.ResultId, obj));
+                    new MainSignals.ProductionCancelRequest(productionProcess.ResultId, i));
             }
         }
 
         private void UpdateQueueView(int i)
         {
-            var queueAspect = i.Get<AspectQueue>();
-            ApplyQueue(queueAspect.List, i);
             _queueUpdateSup?.Dispose();
-            _queueUpdateSup = queueAspect.OnChange.Subscribe(unit => ApplyQueue(queueAspect.List, i));
+            var queueAspect = i.Get<AspectQueue>();
+            ShowQueue(queueAspect.List, i);
+            _queueUpdateSup = queueAspect.OnChange.Subscribe(unit => ShowQueue(queueAspect.List, i)).AddTo(_sup);
         }
 
 
-        private void ApplyQueue(List<string> queue, int objId)
+        private void ShowQueue(List<string> queue, int i)
         {
+            if(_unitSelected != i)
+                return;
+
             _iconsQueueList.ForEach(x=>x.Dispose());
             _iconsQueueList.Clear();
+
             for (var index = 0; index < queue.Count; index++)
             {
                 var id = queue[index];
                 var iconView = PrefabPool.InstanceGlobal.Spawn(_visualData.IconButtonView, _queueParent);
                 _iconsQueueList.Add(iconView);
-                iconView.Bind(id, new MainSignals.ProductionDequeueRequest(id, objId, index));
+                iconView.Bind(id, new MainSignals.ProductionDequeueRequest(id, i, index));
             }
         }
 

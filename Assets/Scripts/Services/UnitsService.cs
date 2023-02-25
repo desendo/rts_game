@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Data;
 using Locator;
 using Models.Aspects;
@@ -21,19 +22,25 @@ namespace Services
     {
         IReadOnlyReactiveProperty<AspectUnit> CurrentUnitSelected { get; }
         void SetSelected(AspectUnit unit);
+        List<UnitView> UnitViews { get; }
+        void CreateUnit(Vector3 pos, string configId, List<Vector3> initialPath);
+
     }
 
     public class UnitsService : ITick, IUnitsService, ISpawn, IDataHandler<LevelSaveData>
     {
         private readonly ReactiveProperty<AspectUnit> _selected = new ReactiveProperty<AspectUnit>();
 
-        private readonly List<MonoPoolableObject> _spawnedViews = new List<MonoPoolableObject>();
+        private readonly List<UnitView> _spawnedViews = new List<UnitView>();
         private readonly ReactiveProperty<bool> _viewsIsSpawned = new ReactiveProperty<bool>();
         private readonly DataContainer<VisualData> _visualData;
+        private GameConfigData _config;
+        public List<UnitView> UnitViews => _spawnedViews;
 
         public UnitsService()
         {
             _visualData = Container.Get<DataContainer<VisualData>>();
+            _config = Container.Get<DataContainer<GameConfigData>>().Data;
         }
 
         public void SaveData(LevelSaveData data)
@@ -101,6 +108,10 @@ namespace Services
             {
                 save.Id.Set<AspectMoveTarget>(new AspectMoveTarget(save));
             }
+            foreach (var save in data.AspectsMoveSaveData)
+            {
+                save.Id.Set<AspectMove>(new AspectMove(save));
+            }
         }
 
         public IReadOnlyReactiveProperty<bool> ViewsIsSpawned => _viewsIsSpawned;
@@ -145,6 +156,30 @@ namespace Services
         public void SetSpawned(bool val)
         {
             _viewsIsSpawned.Value = val;
+        }
+
+        public void CreateUnit(Vector3 pos, string configId, List<Vector3> initialPath)
+        {
+            var composition = new UnitCompositionBase();
+            var aspectUnit = new AspectUnit();
+            aspectUnit.Position.Value = pos;
+            aspectUnit.Rotation.Value = Quaternion.LookRotation(initialPath[1] - initialPath[0]);
+            aspectUnit.ConfigId = configId;
+            var newIndex = Storage<AspectUnit>.Instance.Add(aspectUnit);
+            aspectUnit.UnitIndex = newIndex;
+            var moveConfig = _config.AspectMoveConfigs.FirstOrDefault(x => x.Id == configId);
+            newIndex.Set(new AspectMove(new AspectMoveSaveData()
+            {
+                Acceleration = moveConfig.Acceleration,
+                Id = newIndex,
+                Speed = moveConfig.Speed,
+                RotationSpeed = moveConfig.RotationSpeed
+            }));
+
+            composition.AspectUnit = aspectUnit;
+            composition.AspectSelection = newIndex.Set(new AspectSelection());
+            var view = CreateView(composition);
+            _spawnedViews.Add(view);
         }
 
         public void Tick(float dt)
@@ -194,6 +229,10 @@ namespace Services
             AspectUnit = Storage<AspectUnit>.Instance.Aspects[i];
             AspectSelection = Storage<AspectSelection>.Instance.Aspects[i];
         }
+
+        public UnitCompositionBase()
+        {
+        }
     }
 
 
@@ -213,7 +252,10 @@ namespace Services
         {
             Storage<T>.Instance.Remove(index);
         }
-
+        public static void Remove(this in int index)
+        {
+            //Storage.RemoveAll(index);
+        }
         public static bool Has<T>(this in int index) where T : class
         {
             return Storage<T>.Instance.Has(index);

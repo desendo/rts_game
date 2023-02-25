@@ -7,5 +7,9 @@ namespace Models.Aspects
         public readonly ReactiveProperty<bool> Selected = new ReactiveProperty<bool>();
         public readonly ReactiveProperty<bool> Hovered = new ReactiveProperty<bool>();
         public readonly ReactiveProperty<bool> Actioned = new ReactiveProperty<bool>();
+
+        public AspectSelection()
+        {
+        }
     }
 }

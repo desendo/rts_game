@@ -22,6 +22,9 @@ namespace Services
 
         public T Get(int index)
         {
+            if (index >= Aspects.Length)
+                return null;
+
             return _aspects[index];
         }
 
@@ -31,6 +34,8 @@ namespace Services
                 Array.Resize(ref Instance._aspects, index + index / 2);
             _aspects[index] = aspect;
             OnAdd.OnNext(index);
+            if (index >= _lastIndex)
+                _lastIndex = index;
             return aspect;
         }
 

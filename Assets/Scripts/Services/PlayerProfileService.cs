@@ -108,13 +108,11 @@ namespace Services
 
         private void Log(object obj)
         {
-            return;
             Debug.Log(obj);
         }
 
         private void LogWarning(object obj)
         {
-            return;
 
             Debug.LogWarning(obj);
         }

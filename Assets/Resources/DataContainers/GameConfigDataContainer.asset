@@ -29,8 +29,8 @@ MonoBehaviour:
     AspectMoveConfigs:
     - Id: tank_1
       Speed: 10
-      Acceleration: 15
-      RotationSpeed: 2000
+      Acceleration: 5000
+      RotationSpeed: 5000
     AspectProductionConfigs:
     - Id: factory_1
       ProductionVariantConfigs:

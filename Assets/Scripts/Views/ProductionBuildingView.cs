@@ -19,16 +19,20 @@ namespace Views
         private UnitCompositionBase _model;
 
         protected readonly CompositeDisposable _sup = new CompositeDisposable();
+        private int _index;
+
+        public int Index => _index;
+
         public virtual UnitCompositionBase Model => _model;
         public virtual void Bind(UnitCompositionBase model)
         {
+            _index = model.AspectUnit.UnitIndex;
             _model = model;
             model.AspectSelection.Hovered.Subscribe(b => { _hovered.SetActive(b);}).AddTo(_sup);
             model.AspectSelection.Selected.Subscribe(b => { _selected.SetActive(b);}).AddTo(_sup);
             transform.position = model.AspectUnit.Position.Value;
             transform.rotation = model.AspectUnit.Rotation.Value;
             //model.AspectSelection.Actioned.Subscribe(b => { _actioned.SetActive(b);}).AddTo(_sup);
-            NavMeshBuilder.BuildNavMesh();
         }
 
         public override void Awake()
@@ -71,6 +75,7 @@ namespace Views
 
     public interface IModelView
     {
+        public int Index { get; }
         UnitCompositionBase Model { get; }
         void Bind(UnitCompositionBase model);
     }

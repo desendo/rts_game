@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Models;
+using Models.Aspects;
 using Services;
 using UnityEngine;
 
@@ -14,11 +15,17 @@ namespace Views
         public override void Bind(UnitCompositionBase model)
         {
             base.Bind(model);
-            if (model is UnitsService.CompositionUnitFactory barracksModel)
-            {
+            var path = new AspectUnitExitPath();
+            path.Path.Add(_anchor1.position);
+            path.Path.Add(_anchor2.position);
+            Index.Set<AspectUnitExitPath>(path);
 
-            }
+        }
 
+        public override void OnDespawned()
+        {
+            base.OnDespawned();
+            Index.Remove();
         }
     }
 }
