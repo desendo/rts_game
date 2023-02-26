@@ -36,7 +36,6 @@ namespace Views.UI.Displays
             {
                 _unitsService = Container.Get<IUnitsService>();
                 _visualData = Container.Get<VisualData>();
-                _unitsService.CurrentUnitSelected.Subscribe(UnitSelected);
             });
         }
 

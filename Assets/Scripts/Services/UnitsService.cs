@@ -22,8 +22,7 @@ namespace Services
 
     public interface IUnitsService
     {
-        IReadOnlyReactiveProperty<AspectUnit> CurrentUnitSelected { get; }
-        void SetSelected(AspectUnit unit);
+        Dictionary<int, UnitView> Units { get; set; }
 
     }
 
@@ -37,7 +36,7 @@ namespace Services
         private readonly EcsWorld _world;
         private readonly EcsFilter _unitFilter;
         public IReadOnlyReactiveProperty<bool> ViewsIsSpawned => _viewsIsSpawned;
-
+        public Dictionary<int, UnitView> Units { get; set; } = new Dictionary<int, UnitView>();
         public UnitsService()
         {
             _visualData = Container.Get<DataContainer<VisualData>>();
@@ -140,16 +139,38 @@ namespace Services
 
             foreach (var save in data.ComponentMoveSaveData)
             {
+                var pool1 = _world.GetPool<ComponentMove>();
+                foreach (var e in _unitFilter)
+                {
+                    if (save.Id == e)
+                    {
+                        ref var c1 = ref pool1.Add(e);
+                        c1.MoveAcc = save.Acceleration;
+                        c1.MoveSpeed = save.Speed;
+                        c1.RotationSpeed = save.RotationSpeed;
+                    }
+
+                }
             }
             foreach (var save in data.ComponentProductionSchemaSaveData)
             {
+                var pool1 = _world.GetPool<ComponentProductionSchema>();
+                foreach (var e in _unitFilter)
+                {
+                    if (save.Id == e)
+                    {
+                        ref var c1 = ref pool1.Add(e);
+                        c1.Variants = save.ProductionVariants;
+                    }
+
+                }
             }
         }
 
 
         public void SpawnViews()
         {
-            
+
             var filter = _world.Filter<ComponentUnit>().Inc<ComponentTransform>().Inc<ComponentSelection>().End();
 
             foreach (var i in filter)
@@ -158,6 +179,8 @@ namespace Services
                 var tr = _world.GetPool<ComponentTransform>().Get(i);
                 var selection = _world.GetPool<ComponentSelection>().Get(i);
                 var view = CreateView(unit, tr);
+                _spawnedViews.Add(view);
+                Units.Add(i, view);
             }
 
         }
@@ -174,6 +197,7 @@ namespace Services
 
             var view = PrefabPool.PrefabPool.InstanceGlobal.Spawn(prefab);
             view.transform.position = tr.Position;
+            view.transform.rotation = tr.Rotation;
             view.Bind(unit.UnitIndex);
 
             return view;
@@ -183,6 +207,7 @@ namespace Services
         {
             _spawnedViews.ForEach(o => o.Dispose());
             _spawnedViews.Clear();
+            Units.Clear();
         }
 
         public void SetSpawned(bool val)
@@ -194,12 +219,8 @@ namespace Services
         {
         }
 
-        public IReadOnlyReactiveProperty<AspectUnit> CurrentUnitSelected => _selected;
+        
 
-        public void SetSelected(AspectUnit unit)
-        {
-            _selected.Value = unit;
-        }
 
     }
 

@@ -11,7 +11,7 @@ using UnityEngine.EventSystems;
 
 namespace Views
 {
-    public class UnitView : MonoPoolableObject, IPointerClickHandler, IModelView,ISelect
+    public class UnitView : MonoPoolableObject, IPointerClickHandler, IModelView, ISelect
     {
         [SerializeField] private Collider _collider;
         [SerializeField] private GameObject _selected;
@@ -23,17 +23,12 @@ namespace Views
         private int _entity;
         private EcsWorld _world;
         private ISelect _selectImplementation;
-        private bool _selectEnabled;
         public int Entity => _entity;
 
         public void Bind(int entity)
         {
             _world = Container.Get<EcsWorld>();
             _entity = entity;
-            var unit = _world.GetPool<ComponentUnit>().Get(_entity);
-            ref var tr = ref _world.GetPool<ComponentTransform>().Get(_entity);
-            ref var sel = ref _world.GetPool<ComponentSelection>().Get(_entity);
-
         }
         public override void Awake()
         {

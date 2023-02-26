@@ -35,10 +35,10 @@ namespace Signals
         }
         public class SelectRequest : ISignal
         {
-            public int Model { get; }
-            public SelectRequest(int model)
+            public int Entity { get; }
+            public SelectRequest(int entity)
             {
-                Model = model;
+                Entity = entity;
             }
         }
         public class HoverRequest : ISignal

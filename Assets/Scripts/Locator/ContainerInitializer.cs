@@ -30,9 +30,9 @@ namespace Locator
 
             _escWorld = new EcsWorld();
             _systems = new EcsSystems(_escWorld);
-
             Container.AddExplicit(_escWorld);
             Container.AddExplicit(_systems);
+            _systems.Add(new ClickSystem());
             AddDataContainers();
             AddServices();
             AddRules();
@@ -61,8 +61,6 @@ namespace Locator
         {
             Container.Add<GameLoadRule>();
             Container.Add<SaveLoadPlayerDataRule>();
-            Container.Add<ClickRule>();
-            Container.Add<UnitSelectedRule>();
             Container.Add<ProductionQueueRule>();
             Container.Add<StartProductionRule>();
             Container.Add<RunProductionRule>();
