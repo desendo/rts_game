@@ -15,14 +15,33 @@ MonoBehaviour:
   Data:
     IconButtonView: {fileID: 1816124834279266648, guid: 45963d201a7e57643b8b52f0caf63097,
       type: 3}
+    MarkerView: {fileID: 317989791362092010, guid: 083b9b5053e7ba24d8981a67beee1c15,
+      type: 3}
     UnitViews:
     - Id: factory_1
       Obj: {fileID: 2558760202264204109, guid: 757975954c004c44b8ac24df8d675350, type: 3}
     - Id: tank_1
       Obj: {fileID: 7586093616386629789, guid: 7f69ea9cb5c65684ca438098f03a38d6, type: 3}
+    - Id: dozer_1
+      Obj: {fileID: 7021399197050124342, guid: 3f9382a34df45e8468c3bc500aa8bc7a, type: 3}
+    - Id: energy_station_1
+      Obj: {fileID: 7339621507315596817, guid: 838fd37b5ae56774db8189869b31f36e, type: 3}
+    - Id: energy_station_1_preview
+      Obj: {fileID: 7339621507315596817, guid: ca4460d50f363d642899a2c5580f9675, type: 3}
+    - Id: energy_station_1_preview
+      Obj: {fileID: 7339621507315596817, guid: ca4460d50f363d642899a2c5580f9675, type: 3}
+    - Id: factory_1_preview
+      Obj: {fileID: -4938264710738194865, guid: a89471d76c5ce314891f120e7724c6f0,
+        type: 3}
     Sprites:
     - Id: factory_1
       Obj: {fileID: 21300000, guid: 7a58b6c80b520f8499ba3501ceb2ce11, type: 3}
     - Id: tank_1
       Obj: {fileID: 21300000, guid: d637f84b259664a4184202d65fada1d9, type: 3}
+    - Id: dozer_1
+      Obj: {fileID: 21300000, guid: 2f487122f883e5c4ab0c08d9d6e124c8, type: 3}
+    - Id: doze_1
+      Obj: {fileID: 21300000, guid: 2f487122f883e5c4ab0c08d9d6e124c8, type: 3}
+    - Id: energy_station_1
+      Obj: {fileID: 21300000, guid: e45389a8a97044d4caf408f252370632, type: 3}
     WindowPrefabs: []

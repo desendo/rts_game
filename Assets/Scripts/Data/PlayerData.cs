@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Models;
-using Models.Aspects;
 using Models.Components;
 using Services.StorageHandler;
 using UnityEngine;
@@ -37,9 +36,11 @@ namespace Data
         public List<SaveDataMove> ComponentMoveSaveData = new List<SaveDataMove>();
         public List<SaveDataAttack> ComponentAttackSaveData = new List<SaveDataAttack>();
         public List<SaveDataHealth> ComponentHealthSaveData = new List<SaveDataHealth>();
-        public List<SaveDataProductionSchema> ComponentProductionSchemaSaveData = new List<SaveDataProductionSchema>();
+        public List<SaveDataProductionVariants> ComponentProductionSchemaSaveData = new List<SaveDataProductionVariants>();
         public List<SaveDataProductionQueue> ComponentProductionQueueSaveData = new List<SaveDataProductionQueue>();
         public List<SaveDataMoveTarget> ComponentMoveTargetSaveData = new List<SaveDataMoveTarget>();
+        public List<SaveDataMoveTarget> ComponentMoveRotateTargetsData = new List<SaveDataMoveTarget>();
+        public List<SaveDataMoveTarget> ComponentMoveAgentTargetsData = new List<SaveDataMoveTarget>();
         public CameraSaveData CameraData;
     }
 
@@ -62,6 +63,8 @@ namespace Data
         public float Rotation;
         public bool Selected;
         public bool Selectable;
+        public Vector3 Direction;
+        public Vector3 EffectiveVelocity;
 
         public SaveDataUnit(int id, string configId, int playerIndex, Vector3 position, float rotation)
         {
@@ -72,14 +75,6 @@ namespace Data
             Rotation = rotation;
         }
 
-        public SaveDataUnit(int id, AspectUnit aspectUnit)
-        {
-            Id = id;
-            ConfigId = aspectUnit.ConfigId;
-            PlayerIndex = aspectUnit.PlayerIndex;
-            Position = aspectUnit.Position.Value;
-            Rotation = aspectUnit.Rotation.Value.eulerAngles.y;
-        }
 
         public SaveDataUnit()
         {
@@ -93,13 +88,6 @@ namespace Data
         public float RotationSpeed;
         public float Acceleration;
 
-        public SaveDataMove(int i, AspectMoveConfig moveConfig)
-        {
-            Id = i;
-            Speed = moveConfig.Speed;
-            RotationSpeed = moveConfig.RotationSpeed;
-            Acceleration = moveConfig.Acceleration;
-        }
 
         public SaveDataMove()
         {
@@ -108,10 +96,19 @@ namespace Data
         public SaveDataMove(in int i, ComponentMove move)
         {
             Id = i;
-            Speed = move.MoveSpeed;
-            RotationSpeed = move.RotationSpeed;
+            Speed = move.MoveSpeedCurrent;
+            RotationSpeed = move.RotationSpeedMax;
             Acceleration = move.MoveAcc;
-            
+
+        }
+
+        public SaveDataMove(MoveConfig moveConfig,  int move)
+        {
+            Id = move;
+            Speed = moveConfig.Speed;
+            RotationSpeed = moveConfig.RotationSpeed;
+            Acceleration = moveConfig.Acceleration;
+
         }
     }
     [System.Serializable]
@@ -123,19 +120,12 @@ namespace Data
         public SaveDataAttack()
         {
         }
-        public SaveDataAttack(AspectAttackConfig config, int i)
+        public SaveDataAttack(AttackConfig config, int i)
         {
             Damage = config.Damage;
             Delay = config.Delay;
             Id = i;
         }
-        public SaveDataAttack(AspectAttack aspectAttack, int i)
-        {
-            Damage = aspectAttack.Damage.Value;
-            Delay = aspectAttack.Delay.Value;
-            Id = i;
-        }
-
 
     }
     [System.Serializable]
@@ -149,18 +139,6 @@ namespace Data
         {
         }
 
-        public SaveDataHealth(int id, AspectHealthConfig config)
-        {
-            Id = id;
-            Current = config.Max;
-            Max = config.Max;
-        }
-        public SaveDataHealth(int id, AspectHealth health)
-        {
-            Id = id;
-            Current = health.Current.Value;
-            Max = health.Max.Value;
-        }
     }
 
     [System.Serializable]
@@ -168,20 +146,16 @@ namespace Data
     {
         public Vector3 Target;
         public int Id;
-        public SaveDataMoveTarget(int id, AspectMoveTarget aspect)
-        {
-            Id = id;
-            Target = aspect.Target;
-        }
+
 
         public SaveDataMoveTarget()
         {
         }
 
-        public SaveDataMoveTarget(in int id, ComponentMoveTarget component)
+        public SaveDataMoveTarget(in int id, Vector3 target)
         {
             Id = id;
-            Target = component.Target;
+            Target = target;
         }
     }
 
@@ -204,22 +178,22 @@ namespace Data
     }
 
     [System.Serializable]
-    public class SaveDataProductionSchema
+    public class SaveDataProductionVariants
     {
         public int Id;
         public ProductionVariant[] ProductionVariants;
-        public SaveDataProductionSchema()
+        public SaveDataProductionVariants()
         {
             ProductionVariants = new ProductionVariant[0];
         }
 
-        public SaveDataProductionSchema(int id, ProductionSchemaConfig schemaConfig)
+        public SaveDataProductionVariants(int id, ProductionVariantsConfig variantsConfig)
         {
             Id = id;
-            ProductionVariants = new ProductionVariant[schemaConfig.ProductionVariantConfigs.Count];
-            for (var index = 0; index < schemaConfig.ProductionVariantConfigs.Count; index++)
+            ProductionVariants = new ProductionVariant[variantsConfig.ProductionVariantConfigs.Count];
+            for (var index = 0; index < variantsConfig.ProductionVariantConfigs.Count; index++)
             {
-                var variantConfig = schemaConfig.ProductionVariantConfigs[index];
+                var variantConfig = variantsConfig.ProductionVariantConfigs[index];
                 ProductionVariants[index] = new ProductionVariant()
                 {
                     PriceAmount = variantConfig.Price.Select(x=>x.Amount).ToArray(),
@@ -229,28 +203,11 @@ namespace Data
                 };
             }
         }
-        public SaveDataProductionSchema(int id, AspectProduction aspect)
+
+
+        public SaveDataProductionVariants(in int id, ComponentProductionSchema c1)
         {
             Id = id;
-            ProductionVariants = new ProductionVariant[aspect.ProductionVariants.Length];
-
-            for (var i = 0; i < aspect.ProductionVariants.Length; i++)
-            {
-                var variant = aspect.ProductionVariants[i];
-                ProductionVariants[i] = new ProductionVariant()
-                {
-                    Duration = variant.Duration,
-                    PriceAmount = variant.PricesAmount,
-                    PriceType = variant.PricesTypes,
-                    ResultId = variant.ResultId
-
-                };
-
-            }
-        }
-
-        public SaveDataProductionSchema(in int id, ComponentProductionSchema c1)
-        {
             ProductionVariants = new ProductionVariant[c1.Variants.Length];
 
             for (var i = 0; i < c1.Variants.Length; i++)

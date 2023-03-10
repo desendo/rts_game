@@ -48,22 +48,30 @@ namespace Rules
         public void Tick(float dt)
         {
 
-            if (_camService.CameraView &&  _pointerService.State.Value == PointerState.Free)
+            if (_camService.CameraView && _pointerService.MouseState.Value == PointerMouseState.Free)
             {
                 _timerHold = 0f;
                 //MoveCamera( _moveSpeedVector * dt);
             }
-            else if (_camService.CameraView && _pointerService.State.Value == PointerState.MidButtonHold)
+            else if (_camService.CameraView && _pointerService.MouseState.Value == PointerMouseState.MidButtonHold)
             {
                 _timerHold = 0f;
                 _camService.CameraView.transform.RotateAround(_camService.CameraView.Mid, Vector3.up,
-                    _pointerService.Delta.Value.x * _rotateSpeed);
+                    _pointerService.HoldDelta.Value.x * _rotateSpeed);
             }
-            else if (_camService.CameraView && _pointerService.State.Value == PointerState.RightButtonHold)
+            else if (_camService.CameraView && _pointerService.MouseState.Value == PointerMouseState.RightButtonHold)
             {
                 _timerHold += dt;
                 if(_timerHold> _tolerance)
-                    MoveCamera(new Vector3(_pointerService.Delta.Value.x, 0, _pointerService.Delta.Value.y) * _dragScrollSpeed);
+                    MoveCamera(new Vector3(_pointerService.HoldDelta.Value.x, 0, _pointerService.HoldDelta.Value.y) * _dragScrollSpeed);
+            }
+
+            if (_camService.CameraView)
+            {
+                if(Mathf.Abs(Input.mouseScrollDelta.y) < 0.01f)
+                    return;
+
+                _camService.Zoom(Input.mouseScrollDelta.y);
             }
 
         }

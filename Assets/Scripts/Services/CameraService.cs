@@ -1,5 +1,8 @@
 ﻿using Codice.CM.Common;
 using Data;
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using Locator;
 using UnityEngine;
 using Views;
@@ -12,6 +15,8 @@ namespace Services
         void SetView(CameraView cameraView);
 
         CameraView CameraView { get;}
+        Vector3 GetPlanePointAtCursor(Vector3 mousePosition);
+        void Zoom(float f);
     }
 
 
@@ -22,7 +27,39 @@ namespace Services
         private float _speedY;
         private CameraSaveData _data;
         private bool _viewSet;
+        private readonly float _zoomSpeed = 2f;
+        private readonly float _rotSpeed = 2f;
+        private Tween _zoomTween;
+        private float _targetZoom;
+        private float _initialPos;
+        private Quaternion _initialRot;
+        private Tween _rotween;
         public CameraView CameraView => _view;
+        public Vector3 GetPlanePointAtCursor(Vector3 mousePosition)
+        {
+            _view.ScreenToWorldPlane(mousePosition, out var pos);
+            return pos;
+        }
+
+        public void Zoom(float f)
+        {
+            _targetZoom += f;
+            if (_targetZoom > 10)
+            {
+                _targetZoom = 10;
+            }
+            else if (_targetZoom < -15)
+            {
+                _targetZoom = -15;
+            }
+            var targetRot = new Vector3(_initialRot.eulerAngles.x + _rotSpeed * _targetZoom, 0f, 0f);
+
+            _zoomTween?.Kill();
+            _rotween?.Kill();
+            _zoomTween = _view.Cam.DOFieldOfView( _initialPos + (_zoomSpeed * _targetZoom), 0.1f);
+            _rotween = _view.CameraTransform.DOLocalRotate(  targetRot, 0.1f);
+
+        }
 
         public void Tick(float dt)
         {
@@ -48,6 +85,8 @@ namespace Services
                 return;
             }
             _view = cameraView;
+            _initialPos = CameraView.Cam.fieldOfView;
+            _initialRot = CameraView.CameraTransform.localRotation;
             _viewSet = true;
             if(_data != null)
                 ApplyDataToView(_data);

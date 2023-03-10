@@ -58,8 +58,6 @@ namespace Services.StorageHandler
                 onGetData.Invoke(defaultData);
                 return;
             }
-
-
             if (_jsonService.FromJson<T>(obj, out var data))
             {
                 onGetData.Invoke(data);
@@ -88,7 +86,7 @@ namespace Services.StorageHandler
 
             var dataSerialized = _jsonService.ToJson(data);
 
-
+            Debug.Log(dataSerialized);
             PlayerPrefs.SetString(_playerPrefsDataKey,dataSerialized);
             PlayerPrefs.Save();
             onComplete?.Invoke(true);

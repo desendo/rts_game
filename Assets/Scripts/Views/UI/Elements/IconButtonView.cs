@@ -24,33 +24,37 @@ namespace Views.UI.Elements
             base.Awake();
             _messenger = Container.Get<GameMessenger>();
             _visualData = Container.Get<VisualData>();
+            _timer.enabled = false;
         }
 
-        public void Bind<T>(string iconId, T value = default) where T : ISignal, new()
+        public void Bind<T>(string iconId, T value = default) where T : ISignal
         {
-            _timerSup?.Dispose();
             var sprite = _visualData.GetSprite(iconId);
             if (sprite != null)
                 _icon.sprite = sprite;
             if(value == null)
-                _button.onClick.AddListener(() => _messenger.Fire<T>(new T()));
+                _button.onClick.AddListener(() => _messenger.Fire<T>());
             else
                 _button.onClick.AddListener(() => _messenger.Fire(value));
-            _timer.enabled = false;
         }
-        public void Bind<T>(string iconId, ReactiveProperty<float> time, ReactiveProperty<float> max, T value = default) where T : ISignal, new()
+        public void BindTimer(ReactiveProperty<float> time, ReactiveProperty<float> max)
         {
-            Bind(iconId, value);
+            SetStretched();
+            _timer.fillAmount = 0;
+            _timer.enabled = true;
+            time.Subscribe(f => _timer.fillAmount = f/max.Value ).AddTo(_sup);
+        }
+
+        private void SetStretched()
+        {
             var rectTransform = (RectTransform) transform;
             rectTransform.anchoredPosition = Vector2.zero;
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
             rectTransform.offsetMin = Vector2.zero;
             rectTransform.offsetMax = Vector2.zero;
-            _timer.fillAmount = 0;
-            _timer.enabled = true;
-            _timerSup = time.Subscribe(f => _timer.fillAmount = f/max.Value );
         }
+
         public override void Dispose()
         {
             base.Dispose(this);
@@ -61,6 +65,8 @@ namespace Views.UI.Elements
             base.OnDespawned();
             _button.onClick.RemoveAllListeners();
             _sup?.Clear();
+            _timer.enabled = false;
         }
+
     }
 }

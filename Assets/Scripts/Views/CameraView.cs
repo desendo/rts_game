@@ -10,7 +10,6 @@ namespace Views
     {
         [SerializeField] private Camera _camera;
         [SerializeField] private Transform _cameraTransform;
-        [SerializeField] private Transform _rotateYHandler;
         [SerializeField] private LineRenderer _lineRenderer;
         private ICameraService _service;
         private Plane _plane = new Plane(Vector3.up, Vector3.zero);
@@ -20,10 +19,11 @@ namespace Views
         private Vector3 _mid = new Vector3();
         private Vector3 _deltaToMid;
 
-        public Transform RotateYHandler => _rotateYHandler;
 
         public Vector3[] WorldPlaneCorners => _worldPlaneCorners;
         public Vector3 Mid => _mid;
+        public Transform CameraTransform => _cameraTransform;
+
         private void Awake()
         {
             Container.BindComplete.Where(x => x).Subscribe(b =>

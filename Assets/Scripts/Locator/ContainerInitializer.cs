@@ -1,6 +1,7 @@
 using Data;
 using Leopotam.EcsLite;
 using Rules;
+using Rules.StateSystems;
 using Services;
 using Services.StorageHandler;
 using UnityEngine;
@@ -28,24 +29,41 @@ namespace Locator
             DontDestroyOnLoad(this);
             _instance = this;
 
+            InitEcs();
+
+            AddDataContainers();
+            AddServices();
+            AddSystems();
+            AddRules();
+
+            Container.SetAddComplete(true);
+            Container.Init();
+        }
+
+        private void InitEcs()
+        {
             _escWorld = new EcsWorld();
             _systems = new EcsSystems(_escWorld);
             Container.AddExplicit(_escWorld);
             Container.AddExplicit(_systems);
-            _systems.Add(new ClickSystem());
-            AddDataContainers();
-            AddServices();
-            AddRules();
-            AddSystems();
-
-            Container.SetAddComplete(true);
-            _systems.Init();
-            Container.Init();
         }
 
         private void AddSystems()
         {
-            //_systems.Add()
+            _systems
+                .Add(new ClickSystem())
+                .Add(new MoveSystem())
+                .Add(new ProductionQueueSystem())
+                .Add(new StartProductionSystem())
+                .Add(new RunProductionSystem())
+                .Add(new StartBuildSystem())
+                //ai systems
+                .Add(new StateIsMovingSystem())
+#if UNITY_EDITOR
+                .Add (new Leopotam.EcsLite.UnityEditor.EcsWorldDebugSystem ())
+#endif
+                .Init();
+
         }
 
         private void AddDataContainers()
@@ -61,9 +79,6 @@ namespace Locator
         {
             Container.Add<GameLoadRule>();
             Container.Add<SaveLoadPlayerDataRule>();
-            Container.Add<ProductionQueueRule>();
-            Container.Add<StartProductionRule>();
-            Container.Add<RunProductionRule>();
             Container.Add<CameraMoveRule>();
             Container.Add<DebugKeysRule>();
         }

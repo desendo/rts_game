@@ -114,21 +114,17 @@ namespace Services
                     PlayerIndex = editorData.PlayerIndex
                 });
 
-                var attackConfig = _config.AspectAttackConfigs.FirstOrDefault(x => x.Id == id);
+                var attackConfig = _config.AttackConfigs.FirstOrDefault(x => x.Id == id);
                 if (attackConfig != null)
                     levelSaveData.ComponentAttackSaveData.Add(new SaveDataAttack(attackConfig, i));
 
-                var moveConfig = _config.AspectMoveConfigs.FirstOrDefault(x => x.Id == id);
+                var moveConfig = _config.MoveConfigs.FirstOrDefault(x => x.Id == id);
                 if (moveConfig != null)
-                    levelSaveData.ComponentMoveSaveData.Add(new SaveDataMove(i, moveConfig));
+                    levelSaveData.ComponentMoveSaveData.Add(new SaveDataMove(moveConfig, i));
 
-                var healthConfig = _config.AspectHealthConfigs.FirstOrDefault(x => x.Id == id);
-                if (healthConfig != null)
-                    levelSaveData.ComponentHealthSaveData.Add(new SaveDataHealth(i, healthConfig));
-
-                var productionConfig = _config.AspectProductionConfigs.FirstOrDefault(x => x.Id == id);
+                var productionConfig = _config.ProductionVariantsConfigs.FirstOrDefault(x => x.Id == id);
                 if (productionConfig != null)
-                    levelSaveData.ComponentProductionSchemaSaveData.Add(new SaveDataProductionSchema(i, productionConfig));
+                    levelSaveData.ComponentProductionSchemaSaveData.Add(new SaveDataProductionVariants(i, productionConfig));
 
             }
             return levelSaveData;

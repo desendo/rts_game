@@ -12,6 +12,7 @@ namespace Data
     public class VisualData : IData
     {
         public IconButtonView IconButtonView;
+        public MarkerView MarkerView;
         public List<ObjectEntry<UnitView>> UnitViews;
         public List<ObjectEntry<Sprite>> Sprites;
 

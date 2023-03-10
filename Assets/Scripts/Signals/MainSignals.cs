@@ -43,10 +43,13 @@ namespace Signals
         }
         public class HoverRequest : ISignal
         {
-            public int Model { get; }
-            public HoverRequest(int entity)
+            public int Entity { get; }
+            public bool Hovered { get; }
+
+            public HoverRequest(int entity, bool hovered)
             {
-                Model = entity;
+                Entity = entity;
+                Hovered = hovered;
             }
         }
         public class ContextActionRequest : ISignal
@@ -107,6 +110,17 @@ namespace Signals
             public readonly int UnitIndex;
 
             public ProductionEnqueueRequest(string resultId, in int unitIndex)
+            {
+                ResultId = resultId;
+                UnitIndex = unitIndex;
+            }
+        }
+        public readonly struct ProductionChooseBuildRequest : ISignal
+        {
+            public readonly string ResultId;
+            public readonly int UnitIndex;
+
+            public ProductionChooseBuildRequest(string resultId, in int unitIndex)
             {
                 ResultId = resultId;
                 UnitIndex = unitIndex;

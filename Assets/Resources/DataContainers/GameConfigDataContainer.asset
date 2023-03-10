@@ -17,29 +17,56 @@ MonoBehaviour:
       BorderScrollSpeed: 60
       CameraRotateSpeed: 0.1
       DragScrollSpeed: 0.001
-    AspectHealthConfigs:
-    - Id: factory_1
-      Max: 100
+    HealthConfigs:
     - Id: tank_1
       Max: 100
-    AspectAttackConfigs:
+    - Id: dozer_1
+      Max: 1000
+    AttackConfigs:
     - Id: tank_1
       Delay: 2
-      Damage: 12
-    AspectMoveConfigs:
+      Damage: 15
+    MoveConfigs:
     - Id: tank_1
-      Speed: 10
-      Acceleration: 5000
-      RotationSpeed: 5000
-    AspectProductionConfigs:
+      Speed: 3
+      Acceleration: 5
+      RotationSpeed: 4
+    - Id: dozer_1
+      Speed: 4
+      Acceleration: 60
+      RotationSpeed: 1000
+    ProductionVariantsConfigs:
     - Id: factory_1
       ProductionVariantConfigs:
       - Price:
         - Type: energy
-          Amount: 100
-        Duration: 3
+          Amount: 1
+        Duration: 5
         ResultId: tank_1
+      - Price:
+        - Type: energy
+          Amount: 1
+        Duration: 10
+        ResultId: dozer_1
+    - Id: dozer_1
+      ProductionVariantConfigs:
+      - Price:
+        - Type: steel
+          Amount: 1
+        Duration: 5
+        ResultId: energy_station_1
+      - Price:
+        - Type: energy
+          Amount: 1
+        Duration: 10
+        ResultId: factory_1
     ResultConfigs:
     - Id: tank_1
       ResultType: 1
       ResultAmount: 1
+    - Id: dozer_1
+      ResultType: 1
+      ResultAmount: 1
+    BuildConfigs:
+    - Id: 
+      Price: []

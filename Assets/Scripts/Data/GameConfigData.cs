@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 namespace Data
 {
@@ -7,11 +8,12 @@ namespace Data
     public class GameConfigData : IData
     {
         public GeneralConfig GeneralConfig;
-        public AspectHealthConfig[] AspectHealthConfigs;
-        public AspectAttackConfig[] AspectAttackConfigs;
-        public AspectMoveConfig[] AspectMoveConfigs;
-        public ProductionSchemaConfig[] AspectProductionConfigs;
+        public HealthConfig[] HealthConfigs;
+        public AttackConfig[] AttackConfigs;
+        public MoveConfig[] MoveConfigs;
+        public ProductionVariantsConfig[] ProductionVariantsConfigs;
         public ResultConfig[] ResultConfigs;
+        public BuildConfig[] BuildConfigs;
     }
 
     [Serializable]
@@ -33,18 +35,18 @@ namespace Data
     }
 
     [Serializable]
-    public class AspectHealthConfig : ConfigElementBase
+    public class HealthConfig : ConfigElementBase
     {
         public float Max;
     }
     [Serializable]
-    public class AspectAttackConfig : ConfigElementBase
+    public class AttackConfig : ConfigElementBase
     {
         public float Delay;
         public float Damage;
     }
     [Serializable]
-    public class AspectMoveConfig : ConfigElementBase
+    public class MoveConfig : ConfigElementBase
     {
         public float Speed;
         public float Acceleration;
@@ -55,6 +57,11 @@ namespace Data
     {
         public ResultType ResultType;
         public int ResultAmount;
+    }
+    [Serializable]
+    public class BuildConfig : ConfigElementBase
+    {
+        public List<PricePair> Price = new List<PricePair>();
     }
 
     public enum ResultType
@@ -73,7 +80,7 @@ namespace Data
     }
 
     [Serializable]
-    public class ProductionSchemaConfig : ConfigElementBase
+    public class ProductionVariantsConfig : ConfigElementBase
     {
         public List<ProductionVariantConfig> ProductionVariantConfigs = new List<ProductionVariantConfig>();
 

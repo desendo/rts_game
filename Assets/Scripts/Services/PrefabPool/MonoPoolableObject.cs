@@ -22,9 +22,9 @@ namespace Services.PrefabPool
 		{
 		}
 
-		protected void Dispose<T>(T iconButtonView) where T : MonoBehaviour, IPoolableObject
+		protected void Dispose<T>(T instance) where T : MonoBehaviour, IPoolableObject
 		{
-			PrefabPool.InstanceGlobal.Despawn(iconButtonView);
+			PrefabPool.InstanceGlobal.Despawn(instance);
 		}
 	}
 }

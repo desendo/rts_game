@@ -1,5 +1,4 @@
 ﻿using Locator;
-using Models.Aspects;
 using Services;
 using Signals;
 using UnityEngine;
@@ -15,19 +14,32 @@ namespace Rules
             _messenger = Container.Get<GameMessenger>();
         }
 
-        private void OnRemove((int, AspectSelection) obj)
+
+
+        public void Tick(float dt)
         {
+            if(Input.GetKeyDown(KeyCode.F5))
+                _messenger.Fire(new MainSignals.SaveGameRequest());
+            if(Input.GetKeyDown(KeyCode.F9))
+                _messenger.Fire(new MainSignals.LoadGameRequest());
+        }
+    }
+    public class HotKeysRule : ITick
+    {
+        private GameMessenger _messenger;
+
+        public HotKeysRule()
+        {
+            _messenger = Container.Get<GameMessenger>();
         }
 
-        private void OnAdd((int, AspectSelection) obj)
-        {
-        }
+
 
         public void Tick(float dt)
         {
             if(Input.GetKeyDown(KeyCode.S))
                 _messenger.Fire(new MainSignals.SaveGameRequest());
-            if(Input.GetKeyDown(KeyCode.L))
+            if(Input.GetKeyDown(KeyCode.F9))
                 _messenger.Fire(new MainSignals.LoadGameRequest());
         }
     }
