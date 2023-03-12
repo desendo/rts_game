@@ -10,7 +10,10 @@ namespace Services
         Free,
         LeftButtonHold,
         MidButtonHold,
-        RightButtonHold
+        RightButtonHold,
+        LeftClick,
+        RightClick,
+        MiddleCLick
     }
     public enum FunctionalState
     {
@@ -27,6 +30,7 @@ namespace Services
     public interface IReadOnlyPointerService
     {
         public IReadOnlyReactiveProperty<PointerMouseState> MouseState { get; }
+        public IReadOnlyReactiveProperty<PointerMouseState> PrevMouseState { get; }
         public IReadOnlyReactiveProperty<FunctionalState> FunctionalState { get; }
         public IReadOnlyReactiveProperty<UnitState> UnitState { get; }
         public IReadOnlyReactiveProperty<Vector2> PointerPos { get; }
@@ -68,6 +72,7 @@ namespace Services
         }
 
         public IReadOnlyReactiveProperty<PointerMouseState> MouseState => _mouseState;
+        public IReadOnlyReactiveProperty<PointerMouseState> PrevMouseState => _mouseStatePrev;
         public IReadOnlyReactiveProperty<FunctionalState> FunctionalState => _functionalState;
         public IReadOnlyReactiveProperty<UnitState> UnitState => _unitState;
         public IReadOnlyReactiveProperty<Vector2> PointerPos => _pos;
@@ -76,9 +81,9 @@ namespace Services
         public IReadOnlyReactiveProperty<Vector2> Delta => _delta;
         public float Sum => _dragSum;
         public IReadOnlyReactiveProperty<bool> IsHovered => _isHovered;
-        public float SumTolerance => _dragSumTolerance;
 
         private readonly ReactiveProperty<PointerMouseState> _mouseState = new ReactiveProperty<PointerMouseState>();
+        private readonly ReactiveProperty<PointerMouseState> _mouseStatePrev = new ReactiveProperty<PointerMouseState>();
         private readonly ReactiveProperty<FunctionalState> _functionalState = new ReactiveProperty<FunctionalState>();
         private readonly ReactiveProperty<UnitState> _unitState = new ReactiveProperty<UnitState>();
         private readonly ReactiveProperty<Vector2> _pos = new ReactiveProperty<Vector2>();
@@ -88,12 +93,8 @@ namespace Services
         private readonly ReactiveProperty<bool> _isHovered = new ReactiveProperty<bool>();
 
         private float _dragSum;
-        private float _dragSumTolerance = 5f;
         private float _dragTolerance = 5f;
 
-        private bool _mouseButtonHold0;
-        private bool _mouseButtonHold1;
-        private bool _mouseButtonHold2;
         public void Tick(float dt)
         {
             _delta.Value = _pos.Value - (Vector2)Input.mousePosition;
@@ -107,20 +108,18 @@ namespace Services
                     _dragSum = 0;
                     _prevPos.Value = _pos.Value;
                     _sumDelta.Value = Vector2.zero;
+                    _mouseStatePrev.Value = _mouseState.Value;
                     _mouseState.Value = Services.PointerMouseState.Free;
                     _functionalState.Value = Services.FunctionalState.Free;
                 }
 
-                _mouseButtonHold0 = false;
-                _mouseButtonHold1 = false;
-                _mouseButtonHold2 = false;
             }
-
-            if (_mouseButtonHold0)
+            if (Input.GetMouseButton(0))
             {
                 if (_mouseState.Value != Services.PointerMouseState.LeftButtonHold)
                 {
                     _prevPos.Value = _pos.Value;
+                    _mouseStatePrev.Value = _mouseState.Value;
                     _mouseState.Value = Services.PointerMouseState.LeftButtonHold;
                     _sumDelta.Value = Vector2.zero;
                     _dragSum = 0;
@@ -131,33 +130,26 @@ namespace Services
                 }
                 _dragSum = _sumDelta.Value.magnitude;
             }
-
-            if (_mouseButtonHold1)
+            else if (Input.GetMouseButton(1))
             {
                 if (_mouseState.Value != Services.PointerMouseState.RightButtonHold
                     && _dragTolerance < _sumDelta.Value.magnitude)
                 {
                     _prevPos.Value = _pos.Value;
+                    _mouseStatePrev.Value = _mouseState.Value;
                     _mouseState.Value = Services.PointerMouseState.RightButtonHold;
                     _sumDelta.Value = Vector2.zero;
                     _dragSum = 0;
                 }
 
-                if (_mouseState.Value == Services.PointerMouseState.RightButtonHold)
-                {
-                    if (_sumDelta.Value.magnitude > _dragSumTolerance && _functionalState.Value != Services.FunctionalState.DragPanning)
-                    {
-                        _functionalState.Value = Services.FunctionalState.DragPanning;
-                    }
-                }
 
             }
-
-            if (_mouseButtonHold2)
+            else if (Input.GetMouseButton(2))
             {
                 if (_mouseState.Value != Services.PointerMouseState.MidButtonHold)
                 {
                     _sumDelta.Value = Vector2.zero;
+                    _mouseStatePrev.Value = _mouseState.Value;
                     _mouseState.Value = Services.PointerMouseState.MidButtonHold;
                     _dragSum = 0;
                 }
@@ -166,19 +158,22 @@ namespace Services
                 _dragSum = _sumDelta.Value.magnitude;
             }
 
-            if (Input.GetMouseButton(0))
-            {
-                _mouseButtonHold0 = true;
-            }
-            else if (Input.GetMouseButton(1))
-            {
-                _mouseButtonHold1 = true;
-            }
-            else if (Input.GetMouseButton(2))
-            {
-                _mouseButtonHold2 = true;
-            }
 
+            if (Input.GetMouseButtonUp(0))
+            {
+                _mouseStatePrev.Value = _mouseState.Value;
+                _mouseState.Value = Services.PointerMouseState.LeftClick;
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                _mouseStatePrev.Value = _mouseState.Value;
+                _mouseState.Value = Services.PointerMouseState.RightClick;
+            }
+            else if (Input.GetMouseButtonUp(2))
+            {
+                _mouseStatePrev.Value = _mouseState.Value;
+                _mouseState.Value = Services.PointerMouseState.MiddleCLick;
+            }
         }
     }
 }

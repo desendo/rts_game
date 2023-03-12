@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Data;
 using Helpers;
 using Leopotam.EcsLite;
@@ -29,6 +30,14 @@ namespace Rules
         private float _rotateBuilingTolerance = 0.5f;
 
         private UnitState _prevState;
+        private IDisposable _timer;
+
+        public void Init(IEcsSystems systems)
+        {
+            _world = systems.GetWorld();
+            _filter = _world.Filter<ComponentProductionSchema>().Inc<ComponentBuilder>().End();
+
+        }
         public StartBuildSystem()
         {
             _config = Container.Get<GameConfigData>();
@@ -37,75 +46,72 @@ namespace Rules
             _unitsService = Container.Get<IUnitsService>();
             _messenger = Container.Get<GameMessenger>();
             _messenger.Subscribe<MainSignals.ProductionChooseBuildRequest>(ProductionChooseBuild);
-            _messenger.Subscribe<MainSignals.EarthLeftClick>(x => OnEarthLeftClick());
-
+            _pointerService.MouseState.Where(x=>x == PointerMouseState.LeftClick ).Subscribe(state =>
+            {
+                if (_pointerService.UnitState.Value == UnitState.ChooseBuildSite )
+                {
+                    if (_preview is not null)
+                    {
+                        _unitsService.CreateUnit(_preview.ConfigId, _preview.transform.position,
+                            _preview.transform.rotation, out var entity);
+                        _unitsService.HidePreview();
+                        _pointerService.SetUnitState(UnitState.Free);
+                        _preview = null;
+                    }
+                }
+            });
+            _pointerService.MouseState.Where(x=> x == PointerMouseState.RightClick).Subscribe(state =>
+            {
+                if (_pointerService.UnitState.Value == UnitState.ChooseBuildSite &&
+                    _pointerService.PrevMouseState.Value != PointerMouseState.RightButtonHold)
+                {
+                    if (_preview is not null)
+                    {
+                        _unitsService.HidePreview();
+                        _preview = null;
+                        _pointerService.SetUnitState(UnitState.Free);
+                    }
+                }
+            });
         }
 
-        private void OnEarthLeftClick()
-        {
-            Debug.Log("click");
-        }
-
-        public void Init(IEcsSystems systems)
-        {
-            _world = systems.GetWorld();
-            _filter = _world.Filter<ComponentProductionSchema>().Inc<ComponentBuilder>().End();
-        }
         private void ProductionChooseBuild(MainSignals.ProductionChooseBuildRequest obj)
         {
-            if (_pointerService.UnitState.Value == UnitState.Free)
+            _timer?.Dispose();
+            _timer = Observable.TimerFrame(1).Subscribe(l =>
             {
-                //var cfg = _config.BuildConfigs.FirstOrDefault(x => x.Id == obj.ResultId);
-
-                _preview = _unitsService.ShowPreview(obj.ResultId,
-                    _cameraService.GetPlanePointAtCursor(Input.mousePosition));
-                if (_preview != null)
+                if (_pointerService.UnitState.Value == UnitState.Free)
                 {
-                    _preview.SetId(obj.ResultId);
-                    _preview.transform.rotation = Const.DefaultAngle;
-                    _pointerService.SetUnitState(UnitState.ChooseBuildSite);
+                    //var cfg = _config.BuildConfigs.FirstOrDefault(x => x.Id == obj.ResultId);
 
+                    _preview = _unitsService.ShowPreview(obj.ResultId,
+                        _cameraService.GetPlanePointAtCursor(Input.mousePosition));
+                    if (_preview != null)
+                    {
+                        _preview.SetId(obj.ResultId);
+                        _preview.transform.rotation = Const.DefaultAngle;
+                        _pointerService.SetUnitState(UnitState.ChooseBuildSite);
+                    }
                 }
-            }
+            });
 
         }
 
 
         public void Run(IEcsSystems systems)
         {
-            if (_pointerService.UnitState.Value == UnitState.ChooseBuildSite)
+            if (_pointerService.UnitState.Value == UnitState.ChooseBuildSite && _preview != null)
             {
-                if (_pointerService.MouseState.Value == PointerMouseState.RightButtonHold)
+                if (_pointerService.MouseState.Value == PointerMouseState.LeftButtonHold &&
+                    _pointerService.Sum > _rotateBuilingTolerance)
                 {
-                    _unitsService.HidePreview();
-                    _preview = null;
-                    _pointerService.SetUnitState(UnitState.Free);
+                    _preview.transform.Rotate(Vector3.up, _pointerService.Delta.Value.x);
+                }
+                else
+                {
+                    _preview.transform.position = _cameraService.GetPlanePointAtCursor(Input.mousePosition);
                 }
 
-                if (_preview != null)
-                {
-                    if (_pointerService.MouseState.Value == PointerMouseState.LeftButtonHold &&
-                        _pointerService.Sum > _rotateBuilingTolerance)
-                    {
-                        _preview.transform.Rotate(Vector3.up, _pointerService.Delta.Value.x);
-                    }
-                    else
-                    {
-                        _preview.transform.position = _cameraService.GetPlanePointAtCursor(Input.mousePosition);
-                    }
-                }
-
-                /*if (_pointerService.MouseState.Value == PointerMouseState.Free && _prevState == UnitState.ChooseBuildSite )
-                {
-                    if (_preview is not null)
-                    {
-                        _unitsService.CreateUnit(_preview.ConfigId, _preview.transform.position,
-                            _preview.transform.rotation, out int entity);
-                        _unitsService.HidePreview();
-                        _pointerService.SetUnitState(UnitState.Free);
-                        _preview = null;
-                    }
-                }*/
             }
 
 

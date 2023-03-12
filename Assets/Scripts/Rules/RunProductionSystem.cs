@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Data;
+﻿using Data;
 using Leopotam.EcsLite;
 using Locator;
 using Models.Components;
@@ -14,8 +12,8 @@ namespace Rules
     {
         private readonly GameMessenger _messenger;
         private readonly CompositeDisposable _sup = new CompositeDisposable();
+        private readonly IUnitsService _unitsService;
         private GameConfigData _config;
-        private IUnitsService _unitsService;
         private EcsWorld _world;
         private EcsFilter _filter1;
 

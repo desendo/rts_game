@@ -22,6 +22,7 @@ namespace Rules
         private Vector3 _moveSpeedVector;
         private float _timerHold;
         private float _tolerance = 0.1f;
+        private float _dragSumTolerance = 5f;
 
         public CameraMoveRule()
         {
@@ -48,6 +49,14 @@ namespace Rules
         public void Tick(float dt)
         {
 
+            if (_pointerService.MouseState.Value == Services.PointerMouseState.RightButtonHold)
+            {
+                if (_pointerService.Delta.Value.magnitude > _dragSumTolerance
+                    && _pointerService.FunctionalState.Value != Services.FunctionalState.DragPanning)
+                {
+                    _pointerService.SetFunctionalState(FunctionalState.DragPanning);
+                }
+            }
             if (_camService.CameraView && _pointerService.MouseState.Value == PointerMouseState.Free)
             {
                 _timerHold = 0f;
@@ -59,7 +68,7 @@ namespace Rules
                 _camService.CameraView.transform.RotateAround(_camService.CameraView.Mid, Vector3.up,
                     _pointerService.HoldDelta.Value.x * _rotateSpeed);
             }
-            else if (_camService.CameraView && _pointerService.MouseState.Value == PointerMouseState.RightButtonHold)
+            else if (_camService.CameraView && _pointerService.FunctionalState.Value == Services.FunctionalState.DragPanning)
             {
                 _timerHold += dt;
                 if(_timerHold> _tolerance)
