@@ -2,129 +2,135 @@
 using Locator;
 using Models.Components;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Rules
 {
     public class MoveSystem : IEcsRunSystem
     {
-        private readonly EcsFilter _moveFilter;
         private readonly EcsWorld _world;
         private readonly EcsFilter _moveTargetFilter;
-        private readonly EcsFilter _moveTargetRotateTo;
-        private readonly EcsFilter _moveTargetSimple;
+
+        private readonly float _distanceTolerance = 0.1f;
+        private readonly float _distanceSlowDown = 1f;
+        private float _scalarTolerance = 0.9993f;
+        private float _minimumProximityFactor = 0.3f;
 
         public MoveSystem()
         {
             _world = Container.Get<EcsWorld>();
-            _moveFilter = _world.Filter<ComponentTransform>().Inc<ComponentMove>().End();
-            _moveTargetFilter = _world.Filter<ComponentTransform>().Inc<ComponentMove>().Inc<ComponentMoveTarget>()
-                .Exc<ComponentMoveTargetAgent>()
-                .Exc<ComponentMoveRotateToTarget>()
-                .Exc<ComponentMoveTargetSimple>()
-                .End();
-
-            _moveTargetRotateTo = _world.Filter<ComponentTransform>().Inc<ComponentMove>()
-                .Exc<ComponentMoveTargetAgent>()
-                .Exc<ComponentMoveTarget>()
-                .Exc<ComponentMoveTargetSimple>()
-                .Inc<ComponentMoveRotateToTarget>()
-                .End();
-            _moveTargetSimple = _world.Filter<ComponentTransform>().Inc<ComponentMove>()
-                .Exc<ComponentMoveTargetAgent>()
-                .Exc<ComponentMoveTarget>()
-                .Exc<ComponentMoveRotateToTarget>()
-                .Inc<ComponentMoveTargetSimple>()
-                .End();
-
+            _moveTargetFilter = _world.Filter<ComponentTransform>().Inc<ComponentMove>().Inc<ComponentMoveTarget>().Inc<ComponentNavAgent>().End();
         }
 
         public void Run(IEcsSystems systems)
         {
             foreach (var i in _moveTargetFilter)
             {
+                ref var c1 = ref _world.GetPool<ComponentMoveTarget>().Get(i);
                 ref var c2 = ref _world.GetPool<ComponentTransform>().Get(i);
-                var c1 = _world.GetPool<ComponentMoveTarget>().Get(i);
-                ref var c3 =  ref _world.GetPool<ComponentMove>().Get(i);
+                ref var c3 = ref _world.GetPool<ComponentMove>().Get(i);
+                var agent = _world.GetPool<ComponentNavAgent>().Get(i).Agent;
+
 
                 var targetDirMag = (c1.Target - c2.Position).magnitude;
-                if(targetDirMag < 0.1f)
-                    continue;
-
-                var targetDir = (c1.Target - c2.Position)/targetDirMag;
+                var targetDir = (c1.Target - c2.Position) / targetDirMag;
                 var scalar = Vector3.Dot(c2.Direction, targetDir);
 
-                if (scalar <= 0.95f)
+                c2.OldPosition = c2.Position;
+                c2.OldDirection = c2.Direction;
+                if (targetDirMag < _distanceTolerance)
                 {
-                    ref var c = ref _world.GetPool<ComponentMoveRotateToTarget>().Add(i);
-                    c.Target = c1.Target;
                     _world.GetPool<ComponentMoveTarget>().Del(i);
+                    _world.GetPool<ComponentMoveTargetReached>().Add(i);
+                    c2.Delta = c2.Position - c2.OldPosition;
+                    c2.EffectiveVelocity = c2.Delta / Time.deltaTime;
+                    c2.EffectiveVelocityMag = c2.EffectiveVelocity.magnitude;
+                    agent.ResetPath();
+                    continue;
+                }
+                /*if (!agent.hasPath)
+                {
+                    c2.Position += c2.Direction * c3.MoveSpeedCurrent * Time.deltaTime;
+                    agent.transform.forward = c2.Direction;
+                    agent.transform.position = c2.Position;
+                }*/
+                if (scalar <= _scalarTolerance)
+                {
+                    if (agent.hasPath)
+                    {
+                        agent.ResetPath();
+                    }
+
+                    var proximitySlowFactor = 1f;
+                    if (targetDirMag <_distanceSlowDown)
+                        proximitySlowFactor = targetDirMag / _distanceSlowDown;
+
+                    if (proximitySlowFactor < _minimumProximityFactor)
+                        proximitySlowFactor = _minimumProximityFactor;
+
+                    //c3.RotationSpeedCurrent = Mathf.Pow(Mathf.Clamp(1f - scalar, 0f, 1f), 0.2f) * c3.RotationSpeedMax;
+                    c3.RotationSpeedCurrent = c3.RotationSpeedMax;
+                    c2.Direction = Vector3.RotateTowards(c2.Direction, targetDir,
+                        Time.deltaTime * c3.RotationSpeedCurrent, 0.0f);
+                    c2.Direction.y = c2.Position.y;
+
+                    agent.transform.forward = c2.Direction;
+                    agent.transform.localRotation = Quaternion.Euler(0,agent.transform.eulerAngles.y, 0);
+                    c2.Position += agent.transform.forward * c3.MoveSpeedCurrent * Time.deltaTime * proximitySlowFactor;
+
+                    agent.transform.position = c2.Position;
+                    if (scalar > _scalarTolerance)
+                    {
+                        agent.enabled = true;
+                        c3.RotationSpeedCurrent = 0;
+                    }
                 }
                 else
                 {
-                    ref var c = ref _world.GetPool<ComponentMoveTargetAgent>().Add(i);
-                    c.Target = c1.Target;
+                    agent.enabled = true;
+
+                    if (!agent.hasPath)
+                    {
+                        Vector3[] corners = new Vector3[2];
+
+                        agent.velocity = c2.EffectiveVelocity;
+                        agent.ResetPath();
+                        NavMeshPath path = new NavMeshPath();
+                        agent.CalculatePath(c1.Target, path);
+
+                        if (path.corners.Length == 0)
+                        {
+                            Debug.LogWarning("zero path reseting...");
+                            agent.ResetPath();
+
+                        }
+                        else
+                        {
+                            agent.SetPath(path);
+                        }
+                    }
 
                 }
-            }
 
-            foreach (var i in _moveTargetRotateTo)
-            {
-
-                ref var c2 = ref _world.GetPool<ComponentTransform>().Get(i);
-                var c1 = _world.GetPool<ComponentMoveRotateToTarget>().Get(i);
-                ref var c3 =  ref _world.GetPool<ComponentMove>().Get(i);
-
-                var targetDirMag = (c1.Target - c2.Position).magnitude;
-                var targetDir = (c1.Target - c2.Position)/targetDirMag;
-
-                var scalar = Vector3.Dot(c2.Direction, targetDir);
-                c3.RotationSpeedCurrent = Mathf.Pow(Mathf.Clamp(1f - scalar, 0f, 1f),0.2f) * c3.RotationSpeedMax;
-
-                c2.OldDirection = c2.Direction;
-                c2.Direction = Vector3.RotateTowards(c2.Direction, targetDir,
-                    Time.deltaTime * c3.RotationSpeedCurrent , 0.0f);;
-                c2.OldPosition = c2.Position;
-                c2.Position += c2.Direction * c3.MoveSpeedCurrent * Time.deltaTime;
-                c2.Delta = c2.Position - c2.OldPosition;
-                c2.EffectiveVelocity = c2.Delta / Time.deltaTime;
-                if (scalar > 0.9993)
+                if (agent.hasPath)
                 {
-                    c3.RotationSpeedCurrent = 0;
-                    _world.GetPool<ComponentMoveRotateToTarget>().Del(i);
-                    ref var c = ref _world.GetPool<ComponentMoveTarget>().Add(i);
-                    c.Target = c1.Target;
-                }
-            }
-            foreach (var i in _moveTargetSimple)
-            {
-
-                ref var c2 = ref _world.GetPool<ComponentTransform>().Get(i);
-                var c1 = _world.GetPool<ComponentMoveTargetSimple>().Get(i);
-                ref var c3 =  ref _world.GetPool<ComponentMove>().Get(i);
-
-                var targetDirMag = (c1.Target - c2.Position).magnitude;
-                var targetDir = (c1.Target - c2.Position)/targetDirMag;
-
-                if (targetDirMag < 0.1f)
-                {
-
-                    ref var c0 = ref _world.GetPool<ComponentMoveTarget>().Add(i);
-                    c0.Target = c1.Target;
-                    _world.GetPool<ComponentMoveTargetSimple>().Del(i);
-                    return;
+                    c2.Position = agent.transform.position;
+                    c2.Direction = agent.transform.forward;
                 }
 
-                var scalar = Vector3.Dot(c2.Direction, targetDir);
-                c3.RotationSpeedCurrent = Mathf.Pow(Mathf.Clamp(1f - scalar, 0f, 1f),0.2f) * c3.RotationSpeedMax;
 
-                c2.OldDirection = c2.Direction;
+
+                /*c3.RotationSpeedCurrent = Mathf.Pow(Mathf.Clamp(1f - scalar, 0f, 1f), 0.2f) * c3.RotationSpeedMax;
                 c2.Direction = targetDir;
-                c2.OldPosition = c2.Position;
-                c2.Position += c2.Direction * c3.MoveSpeedCurrent * Time.deltaTime;
+                c2.Position += c2.Direction * c3.MoveSpeedCurrent * Time.deltaTime;*/
+
+
                 c2.Delta = c2.Position - c2.OldPosition;
                 c2.EffectiveVelocity = c2.Delta / Time.deltaTime;
+                c2.EffectiveVelocityMag = c2.EffectiveVelocity.magnitude;
 
             }
         }
+
     }
 }

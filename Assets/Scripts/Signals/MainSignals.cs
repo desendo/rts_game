@@ -54,10 +54,10 @@ namespace Signals
         }
         public class ContextActionRequest : ISignal
         {
-            public int Model { get; }
-            public ContextActionRequest(int model)
+            public int Entity { get; }
+            public ContextActionRequest(int entity)
             {
-                Model = model;
+                Entity = entity;
             }
         }
 

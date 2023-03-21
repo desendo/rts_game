@@ -1,4 +1,3 @@
-using IdolTower.Data;
 using UnityEngine;
 
 namespace Data

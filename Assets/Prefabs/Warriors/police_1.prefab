@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9040399990752600649}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: VIew
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1820423831829886159}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Selection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -73,7 +73,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8712975672047765539}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,7 +108,7 @@ GameObject:
   - component: {fileID: 7586093616386629789}
   - component: {fileID: 4177618818720469917}
   - component: {fileID: 8468904176906204444}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: police_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149,6 +149,7 @@ MonoBehaviour:
   _selected: {fileID: 7286213949680073081}
   _hovered: {fileID: 7839233260602263585}
   _stateMachineController: {fileID: 0}
+  _cameraAnchor: {fileID: 0}
   _agent: {fileID: 8468904176906204444}
   _animator: {fileID: 0}
   _wheels:
@@ -292,6 +293,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: circle_selection
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 465408f6eadfea4498ca6244afc52721,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -396,6 +402,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: circle_selection
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 465408f6eadfea4498ca6244afc52721,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -479,6 +490,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: police_agent
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 5611baaa96c67f642b059f4ace32b00d,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

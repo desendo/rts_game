@@ -29,47 +29,26 @@ namespace Views
 
             if (!_world.GetPool<ComponentMove>().Has(_entity))
                 return;
+            if(!_world.GetPool<ComponentMoveTarget>().Has(_entity))
+                return;
 
-
-            var oldForward = _tr.forward;
             ref var c1 = ref _world.GetPool<ComponentTransform>().Get(_entity);
+            ref var c2 = ref _world.GetPool<ComponentMoveTarget>().Get(_entity);
 
-            if (_world.GetPool<ComponentMoveTargetAgent>().Has(_entity) && _world.GetPool<ComponentMoveTarget>().Has(_entity))
+            /*
+            if (c2.Type == MoveTargetType.MoveTarget)
             {
+
                 _agent.enabled = true;
                 _agent.velocity = c1.EffectiveVelocity;
-
-                var c0 = _world.GetPool<ComponentMoveTargetAgent>().Get(_entity);
-                _agent.autoBraking = true;
                 _agent.ResetPath();
-                NavMeshPath path = new NavMeshPath();
-                _agent.CalculatePath(c0.Target, path);
 
-                _agent.SetPath(path);
-                _world.GetPool<ComponentMoveTarget>().Del(_entity);
-            }
-
-            if (_world.GetPool<ComponentMoveTargetAgent>().Has(_entity))
-            {
-                c1.OldPosition = c1.Position;
-                c1.Position = _tr.position;
-                c1.Rotation = _tr.rotation;
-                c1.Delta = c1.Position - c1.OldPosition;
-
-                c1.OldDirection = c1.Direction;
-
-                c1.EffectiveVelocity = c1.Delta / Time.deltaTime;
-
-                if (c1.Delta.sqrMagnitude > 0.0001f)
-                {
-                    _tr.forward = Vector3.Lerp(_tr.forward, new Vector3(c1.Delta.x,_tr.forward.y,c1.Delta.z), 0.5f);
-                }
-
-                c1.Direction = _tr.forward;
-                UpdateWheels(c1.Direction, c1.OldDirection, c1.EffectiveVelocity);
+                _agent.SetDestination(c2.Target);
+                c2.Type = MoveTargetType.NavAgent;
 
             }
-            else
+
+            if (c2.Type != MoveTargetType.NavAgent)
             {
                 if (_agent.enabled)
                     _agent.enabled = false;
@@ -80,8 +59,22 @@ namespace Views
                 UpdateWheels(c1.Direction, c1.OldDirection, c1.EffectiveVelocity);
 
             }
+            else
+            {
+                c1.Position = _tr.position;
+                c1.Rotation = _tr.rotation;
+                c1.Direction = _tr.forward;
 
+                /*
+                if (c1.Delta.sqrMagnitude > 0.0001f)
+                {
+                    _tr.forward = Vector3.Lerp(_tr.forward, new Vector3(c1.Delta.x,_tr.forward.y,c1.Delta.z), 0.5f);
+                }
+                #1#
 
+                UpdateWheels(c1.Direction, c1.OldDirection, c1.EffectiveVelocity);
+
+            }*/
             _animator.SetBool(IsMoving, c1.EffectiveVelocity.magnitude > 0.1f);
 
         }

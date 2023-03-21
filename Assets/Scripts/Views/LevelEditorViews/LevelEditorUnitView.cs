@@ -28,6 +28,7 @@ namespace Views.LevelEditorViews
             {
                 _levelEditorUnitData.Position = transform.position;
                 _levelEditorUnitData.Rotation = transform.rotation.eulerAngles.y;
+                _levelEditorUnitData.Direction = transform.forward;
                 _levelService.AddUnitLevelEditorData(_levelEditorUnitData);
             }
             else
@@ -41,11 +42,12 @@ namespace Views.LevelEditorViews
     public class LevelEditorUnitData
     {
         public int PlayerIndex;
-        public string Id;
         public string ConfigId;
         [HideInInspector]
         public Vector3 Position;
         [HideInInspector]
         public float Rotation;
+        [HideInInspector]
+        public Vector3 Direction;
     }
 }

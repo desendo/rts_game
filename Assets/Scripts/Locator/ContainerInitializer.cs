@@ -1,3 +1,4 @@
+using System;
 using Data;
 using Leopotam.EcsLite;
 using Rules;
@@ -5,6 +6,7 @@ using Rules.StateSystems;
 using Services;
 using Services.StorageHandler;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Locator
 {
@@ -12,8 +14,10 @@ namespace Locator
     public class ContainerInitializer : MonoBehaviour
     {
         [SerializeField] private DataContainer<PlayerData> _playerData;
+        [SerializeField] private DataContainer<LocalizationData> _localizationData;
         [SerializeField] private DataContainer<GameConfigData> _gameConfigData;
         [SerializeField] private DataContainer<VisualData> _visualData;
+        [SerializeField] private AudioMixer _audioMixer;
 
         private static ContainerInitializer _instance;
         private EcsWorld _escWorld;
@@ -53,10 +57,12 @@ namespace Locator
             _systems
                 .Add(new ClickSystem())
                 .Add(new MoveSystem())
+                .Add(new TaskSystem())
                 .Add(new ProductionQueueSystem())
                 .Add(new StartProductionSystem())
                 .Add(new RunProductionSystem())
                 .Add(new StartBuildSystem())
+                .Add(new UpdateInfoSystem())
                 //ai systems
                 .Add(new StateIsMovingSystem())
 #if UNITY_EDITOR
@@ -73,6 +79,9 @@ namespace Locator
             Container.Add<DataContainer<GameConfigData>>(_gameConfigData);
             Container.Add<GameConfigData>(_gameConfigData.Data);
             Container.Add<DataContainer<PlayerData>>(_playerData);
+            Container.Add<DataContainer<LocalizationData>>(_localizationData);
+            Container.Add<LocalizationData>(_localizationData.Data);
+            Container.AddExplicit(_audioMixer);
         }
 
         private static void AddRules()
@@ -94,6 +103,7 @@ namespace Locator
 
             Container.Add<PointerService>();
             Container.Add<CameraService>();
+            Container.Add<SoundService>();
             Container.Add<GameConfigService>();
             Container.Add<GameStateService>();
             Container.Add<LevelService>();
@@ -109,6 +119,7 @@ namespace Locator
             _systems.Run();
             Container.UpdateLoop(Time.deltaTime);
         }
+
 
         private void FixedUpdate()
         {

@@ -14,4 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Data:
     _currentVersion: -1
-    Timer: 1
+    CurrentPlayerIndex: 1
+    CurrentLevelSaveData:
+      IsValid: 0
+      ComponentUnitSaveData: []
+      ComponentMoveSaveData: []
+      ComponentAttackSaveData: []
+      ComponentHealthSaveData: []
+      ComponentProductionSchemaSaveData: []
+      ComponentProductionQueueSaveData: []
+      ComponentMoveTargetSaveData: []
+      ComponentMoveRotateTargetsData: []
+      ComponentMoveAgentTargetsData: []
+      CameraData:
+        Position: {x: 0, y: 0, z: 0}
+        Height: 0
+        AngleY: 0
+        AngleX: 0

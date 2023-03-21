@@ -1,7 +1,6 @@
-﻿using Data;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace IdolTower.Data
+namespace Data
 {
     [CreateAssetMenu(menuName = "Create LocalizationDataContainer", fileName = "LocalizationDataContainer", order = 0)]
     public class LocalizationDataContainer : DataContainer<LocalizationData>

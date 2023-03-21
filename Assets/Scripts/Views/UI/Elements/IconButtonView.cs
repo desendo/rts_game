@@ -5,11 +5,12 @@ using Services;
 using Services.PrefabPool;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Views.UI.Elements
 {
-    public class IconButtonView : MonoPoolableObject
+    public class IconButtonView : MonoPoolableObject, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private Button _button;
         [SerializeField] private Image _icon;
@@ -22,13 +23,14 @@ namespace Views.UI.Elements
         public override void Awake()
         {
             base.Awake();
-            _messenger = Container.Get<GameMessenger>();
-            _visualData = Container.Get<VisualData>();
             _timer.enabled = false;
         }
 
         public void Bind<T>(string iconId, T value = default) where T : ISignal
         {
+            _messenger ??= Container.Get<GameMessenger>();
+            _visualData ??= Container.Get<VisualData>();
+
             var sprite = _visualData.GetSprite(iconId);
             if (sprite != null)
                 _icon.sprite = sprite;
@@ -68,5 +70,12 @@ namespace Views.UI.Elements
             _timer.enabled = false;
         }
 
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+        }
     }
 }

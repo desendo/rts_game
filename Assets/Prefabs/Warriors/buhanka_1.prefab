@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7811548595457385869}
   - component: {fileID: 8183623071843376914}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Triangle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 822988184944260341}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GameObject (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6464430830409451464}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,7 +158,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9040399990752600649}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: VIew
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -190,7 +190,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1820423831829886159}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Selection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,7 +224,7 @@ GameObject:
   - component: {fileID: 6257078331314580392}
   - component: {fileID: 1780359294149506637}
   - component: {fileID: 2210018864645470692}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Weapon1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -305,7 +305,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8712975672047765539}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -340,7 +340,7 @@ GameObject:
   - component: {fileID: 7586093616386629789}
   - component: {fileID: 4177618818720469917}
   - component: {fileID: 8468904176906204444}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: buhanka_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -382,6 +382,7 @@ MonoBehaviour:
   _selected: {fileID: 7286213949680073081}
   _hovered: {fileID: 7839233260602263585}
   _stateMachineController: {fileID: 0}
+  _cameraAnchor: {fileID: 0}
   _agent: {fileID: 8468904176906204444}
   _animator: {fileID: 4009683832445803435}
   _wheels:
@@ -510,6 +511,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5985934362099304830, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -4819223349682164798, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: -4135703708340461698, guid: ed48cc5700176654aac15d6e5e1922ff,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -600,10 +611,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 250986125936358388, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ed48cc5700176654aac15d6e5e1922ff,
         type: 3}
       propertyPath: m_Name
       value: buhanka
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1326639824636851712, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3406093799734582316, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 3406093799734582316, guid: ed48cc5700176654aac15d6e5e1922ff,
         type: 3}
@@ -655,6 +686,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 0a603d19dd5c65b45810fd4507ea18e6, type: 2}
+    - target: {fileID: 8748574470494689995, guid: ed48cc5700176654aac15d6e5e1922ff,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -811,6 +847,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: circle_selection
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 465408f6eadfea4498ca6244afc52721,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -914,6 +955,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: circle_selection
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 465408f6eadfea4498ca6244afc52721,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

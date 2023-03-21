@@ -1,5 +1,4 @@
-﻿using IdolTower.Data;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Data
 {
@@ -12,7 +11,10 @@ namespace Data
     }
 
     [System.Serializable]
-    public class LocalizationConfig
+    public class LocalizationConfig : ConfigElementBase
     {
+        public string Rus;
+        public string En;
     }
+
 }

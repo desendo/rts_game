@@ -13,6 +13,8 @@ namespace Data
     {
         [SerializeField]
         private int _currentVersion = -1;
+
+        public int CurrentPlayerIndex;
         public LevelSaveData CurrentLevelSaveData;
 
         public PlayerData Copy()
@@ -36,12 +38,16 @@ namespace Data
         public List<SaveDataMove> ComponentMoveSaveData = new List<SaveDataMove>();
         public List<SaveDataAttack> ComponentAttackSaveData = new List<SaveDataAttack>();
         public List<SaveDataHealth> ComponentHealthSaveData = new List<SaveDataHealth>();
-        public List<SaveDataProductionVariants> ComponentProductionSchemaSaveData = new List<SaveDataProductionVariants>();
+        public List<SaveDataProductionSchema> ComponentProductionSchemaSaveData = new List<SaveDataProductionSchema>();
         public List<SaveDataProductionQueue> ComponentProductionQueueSaveData = new List<SaveDataProductionQueue>();
         public List<SaveDataMoveTarget> ComponentMoveTargetSaveData = new List<SaveDataMoveTarget>();
         public List<SaveDataMoveTarget> ComponentMoveRotateTargetsData = new List<SaveDataMoveTarget>();
         public List<SaveDataMoveTarget> ComponentMoveAgentTargetsData = new List<SaveDataMoveTarget>();
+        public List<SaveDataMoveTarget> ComponentMoveSimpleTargetsData = new List<SaveDataMoveTarget>();
+        public List<SaveDataSource> ComponentSourceSaveData = new List<SaveDataSource>();
         public CameraSaveData CameraData;
+        public List<SaveDataAiMemory> ComponentAiMemorySaveData = new List<SaveDataAiMemory>();
+        public List<SaveDataRequiredJob> ComponentRequiredJobSaveData = new List<SaveDataRequiredJob>();
     }
 
     [System.Serializable]
@@ -53,10 +59,30 @@ namespace Data
         public float AngleX;
     }
 
-    [System.Serializable]
-    public class SaveDataUnit
+    public class SaveDataEntityBase : ISaveDataEntity
     {
-        public int Id;
+        public int Id { get; set; }
+    }
+
+    public interface ISaveDataEntity
+    {
+        public int Id { get; set; }
+    }
+
+    [System.Serializable]
+    public class SaveDataAiMemory : SaveDataEntityBase
+    {
+        public Vector3 LastPosition;
+        public Vector3 MoveTargetPosition;
+        public bool HasNewTarget;
+        public JobType TargetJobType;
+        public float Timer;
+        public int TargetEntity;
+    }
+
+    [System.Serializable]
+    public class SaveDataUnit : SaveDataEntityBase
+    {
         public string ConfigId;
         public int PlayerIndex;
         public Vector3 Position;
@@ -81,9 +107,8 @@ namespace Data
         }
     }
     [System.Serializable]
-    public class SaveDataMove
+    public class SaveDataMove  : SaveDataEntityBase
     {
-        public int Id;
         public float Speed;
         public float RotationSpeed;
         public float Acceleration;
@@ -112,9 +137,8 @@ namespace Data
         }
     }
     [System.Serializable]
-    public class SaveDataAttack
+    public class SaveDataAttack : SaveDataEntityBase
     {
-        public int Id;
         public float Damage;
         public float Delay;
         public SaveDataAttack()
@@ -129,9 +153,15 @@ namespace Data
 
     }
     [System.Serializable]
-    public class SaveDataHealth
+    public class SaveDataRequiredJob : SaveDataEntityBase
     {
-        public int Id;
+        public JobType Type;
+
+
+    }
+    [System.Serializable]
+    public class SaveDataHealth : SaveDataEntityBase
+    {
         public float Current;
         public float Max;
 
@@ -140,13 +170,27 @@ namespace Data
         }
 
     }
-
     [System.Serializable]
-    public class SaveDataMoveTarget
+    public class SaveDataSource : SaveDataEntityBase
+    {
+        public ResourceType Type;
+        public float Amount;
+
+        public SaveDataSource()
+        {
+        }
+
+        public SaveDataSource(in int id, ResourceType type, float amount)
+        {
+            Id = id;
+            Type = type;
+            Amount = amount;
+        }
+    }
+    [System.Serializable]
+    public class SaveDataMoveTarget : SaveDataEntityBase
     {
         public Vector3 Target;
-        public int Id;
-
 
         public SaveDataMoveTarget()
         {
@@ -160,9 +204,8 @@ namespace Data
     }
 
     [System.Serializable]
-    public class SaveDataProductionQueue
+    public class SaveDataProductionQueue : SaveDataEntityBase
     {
-        public int Id;
         public string[] List;
 
         public SaveDataProductionQueue(int id, ComponentProductionQueue queue)
@@ -178,16 +221,15 @@ namespace Data
     }
 
     [System.Serializable]
-    public class SaveDataProductionVariants
+    public class SaveDataProductionSchema : SaveDataEntityBase
     {
-        public int Id;
         public ProductionVariant[] ProductionVariants;
-        public SaveDataProductionVariants()
+        public SaveDataProductionSchema()
         {
             ProductionVariants = new ProductionVariant[0];
         }
 
-        public SaveDataProductionVariants(int id, ProductionVariantsConfig variantsConfig)
+        public SaveDataProductionSchema(int id, ProductionVariantsConfig variantsConfig)
         {
             Id = id;
             ProductionVariants = new ProductionVariant[variantsConfig.ProductionVariantConfigs.Count];
@@ -205,7 +247,7 @@ namespace Data
         }
 
 
-        public SaveDataProductionVariants(in int id, ComponentProductionSchema c1)
+        public SaveDataProductionSchema(in int id, ComponentProductionSchema c1)
         {
             Id = id;
             ProductionVariants = new ProductionVariant[c1.Variants.Length];

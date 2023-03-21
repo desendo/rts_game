@@ -22,6 +22,8 @@ MonoBehaviour:
       Max: 100
     - Id: dozer_1
       Max: 1000
+    - Id: tree_1
+      Max: 20
     AttackConfigs:
     - Id: tank_1
       Delay: 2
@@ -35,6 +37,10 @@ MonoBehaviour:
       Speed: 4
       Acceleration: 60
       RotationSpeed: 1000
+    - Id: worker_1
+      Speed: 2
+      Acceleration: 5
+      RotationSpeed: 4
     ProductionVariantsConfigs:
     - Id: factory_1
       ProductionVariantConfigs:
@@ -60,6 +66,10 @@ MonoBehaviour:
           Amount: 1
         Duration: 10
         ResultId: factory_1
+    ResourceConfigs:
+    - Id: tree_1
+      Amount: 10
+      Type: 1
     ResultConfigs:
     - Id: tank_1
       ResultType: 1

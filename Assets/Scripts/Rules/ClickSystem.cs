@@ -15,6 +15,7 @@ namespace Rules
         private readonly EcsWorld _world;
         private readonly EcsFilter _selectMovableFilter;
 
+        private const string tree = "tree";
         public ClickSystem()
         {
             _pointerService = Container.Get<PointerService>();
@@ -50,23 +51,26 @@ namespace Rules
             if (_pointerService.FunctionalState.Value == FunctionalState.Free && _pointerService.UnitState.Value == UnitState.Free)
             {
                 var shouldSpawnWalkMarker = false;
+                var id = string.Empty;
                 foreach (var i in _selectMovableFilter)
                 {
                     var selection = _world.GetPool<ComponentSelection>().Get(i);
                     var unit = _world.GetPool<ComponentUnit>().Get(i);
-                    if (selection.Selected && unit.PlayerIndex == _unitsService.CurrentPlayerIndex.Value)
+
+                    if (selection.Selected && unit.PlayerIndex == _unitsService.CurrentPlayerIndex.Value && i.Has<ComponentAiMemory>(_world))
                     {
-                        if (!_world.GetPool<ComponentMoveTarget>().Has(i))
-                            _world.GetPool<ComponentMoveTarget>().Add(i);
-                        ref var c1 = ref _world.GetPool<ComponentMoveTarget>().Get(i);
-                        c1.Target = objClick;
-                        if (_world.GetPool<ComponentMoveTargetAgent>().Has(i))
-                            _world.GetPool<ComponentMoveTargetAgent>().Del(i);
-                        if (_world.GetPool<ComponentMoveRotateToTarget>().Has(i))
-                            _world.GetPool<ComponentMoveRotateToTarget>().Del(i);
+                        ref var ai = ref _world.GetPool<ComponentAiMemory>().Get(i);
+                        ai.HasNewTarget = true;
+                        ai.TargetPosition = objClick;
+                        ai.LastPosition = i.Get<ComponentTransform>(_world).Position;
+                        ai.TargetJobType = JobType.None;
+                        ai.Target = default;
                         shouldSpawnWalkMarker = true;
+                        id = unit.ConfigId;
                     }
                 }
+                if(!string.IsNullOrEmpty(id))
+                    Container.Get<SoundService>().PlayMove(id);
 
                 if (shouldSpawnWalkMarker)
                     _unitsService.SpawnMoveMarker(objClick);
@@ -110,7 +114,27 @@ namespace Rules
 
         private void OnActionRequest(MainSignals.ContextActionRequest obj)
         {
-            //Debug.Log("action");
+            foreach (var selected in _selectMovableFilter)
+            {
+                var selection =  _world.GetPool<ComponentSelection>().Get(selected);
+
+                if (!selection.Selected) continue;
+                if (!_world.GetPool<ComponentWorker>().Has(selected)) continue;
+                if (!_world.GetPool<ComponentSource>().Has(obj.Entity)) continue;
+
+                if (obj.Entity.Has<ComponentSource>(_world))
+                {
+                    var source = obj.Entity.Get<ComponentSource>(_world);
+                    if (source.Type == ResourceType.Wood)
+                    {
+                        ref var task = ref _world.GetPool<ComponentChopTreeJobRequest>().Add(selected);
+                        task.ClickPosition = obj.Entity.Get<ComponentTransform>(_world).Position;
+                        task.Tree = _world.PackEntity(obj.Entity);
+
+                    }
+                }
+            }
+
         }
 
         private void OnSelectRequest(MainSignals.SelectRequest obj)
@@ -124,6 +148,8 @@ namespace Rules
                 {
                     _unitsService.SetSelected(i);
                     selection.Selected = true;
+                    var unit = _world.GetPool<ComponentUnit>().Get(i);
+                    Container.Get<SoundService>().PlaySelect(unit.ConfigId);
                 }
             }
         }

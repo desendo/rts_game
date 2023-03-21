@@ -11,9 +11,7 @@ using UniRx;
 using UnityEngine;
 using Views;
 
-namespace Helpers
-{
-}
+
 namespace Rules
 {
     public class StartBuildSystem : IEcsInitSystem, IEcsRunSystem
@@ -53,7 +51,7 @@ namespace Rules
                     if (_preview is not null)
                     {
                         _unitsService.CreateUnit(_preview.ConfigId, _preview.transform.position,
-                            _preview.transform.rotation, out var entity);
+                            _preview.transform.rotation, _unitsService.CurrentPlayerIndex.Value, out var entity);
                         _unitsService.HidePreview();
                         _pointerService.SetUnitState(UnitState.Free);
                         _preview = null;

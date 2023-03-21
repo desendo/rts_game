@@ -33,6 +33,10 @@ MonoBehaviour:
     - Id: factory_1_preview
       Obj: {fileID: -4938264710738194865, guid: a89471d76c5ce314891f120e7724c6f0,
         type: 3}
+    - Id: tree_1
+      Obj: {fileID: 586761376088634664, guid: 4ff48fa340c3ffd44ad41b625053f41e, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 3651143750187960617, guid: 5367b367566730346a85c9f9374d27e2, type: 3}
     Sprites:
     - Id: factory_1
       Obj: {fileID: 21300000, guid: 7a58b6c80b520f8499ba3501ceb2ce11, type: 3}
@@ -44,4 +48,28 @@ MonoBehaviour:
       Obj: {fileID: 21300000, guid: 2f487122f883e5c4ab0c08d9d6e124c8, type: 3}
     - Id: energy_station_1
       Obj: {fileID: 21300000, guid: e45389a8a97044d4caf408f252370632, type: 3}
+    SoundsConfirm:
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 5ff0fbeb787370a4db82d59655570813, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: d8cbc25479131a84b941d14566b34504, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 2f49d1e7065067945b92c9540cf62b7b, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 56e53375ecd4d524e8cd29d1655841a9, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 3ea18134bc787cb4d814b877a5575831, type: 3}
+    SoundsSelect:
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: b9408353ec9655e4eba6bf4db2d1b09b, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 1f9a91bb8b1d4ec4584b9b9450c500c5, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 2658ecbb42d16d046afed73b50cbfa2a, type: 3}
+    SoundsMove:
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: ba51f46b59483b84bb2efcff4ed6bf48, type: 3}
+    - Id: worker_1
+      Obj: {fileID: 8300000, guid: 61716aedbfa69384e982b7918bbb2966, type: 3}
+    SoundsAttack: []
     WindowPrefabs: []

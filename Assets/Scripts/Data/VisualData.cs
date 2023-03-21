@@ -15,6 +15,10 @@ namespace Data
         public MarkerView MarkerView;
         public List<ObjectEntry<UnitView>> UnitViews;
         public List<ObjectEntry<Sprite>> Sprites;
+        public List<ObjectEntry<AudioClip>> SoundsConfirm;
+        public List<ObjectEntry<AudioClip>> SoundsSelect;
+        public List<ObjectEntry<AudioClip>> SoundsMove;
+        public List<ObjectEntry<AudioClip>> SoundsAttack;
 
         private Dictionary<string, UnitView> _cache = new Dictionary<string, UnitView>();
         private Dictionary<string, Sprite> _cacheSprites = new Dictionary<string, Sprite>();

@@ -40,11 +40,12 @@ namespace Rules
                 {
                     if (_world.GetPool<ComponentUnitProductionBuilding>().Has(i))
                     {
+                        var playerIndex = _world.GetPool<ComponentUnit>().Get(i).PlayerIndex;
                         var path = _world.GetPool<ComponentUnitProductionBuilding>().Get(i);
                         var pos = path.Path[0];
                         var rot = Quaternion.LookRotation(path.Path[1] - path.Path[0]);
-                        _unitsService.CreateUnit(c1.Result, pos, rot, out var unit);
-                        ref var c4 = ref _world.GetPool<ComponentMoveTargetSimple>().Add(unit);
+                        _unitsService.CreateUnit(c1.Result, pos, rot, playerIndex, out var unit);
+                        ref var c4 = ref _world.GetPool<ComponentMoveTarget>().Add(unit);
                         c4.Target = path.Path[1];
                         _world.GetPool<ComponentProductionRun>().Del(i);
                     }

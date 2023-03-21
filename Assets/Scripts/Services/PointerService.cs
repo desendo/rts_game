@@ -123,7 +123,7 @@ namespace Services
                     _mouseState.Value = Services.PointerMouseState.LeftButtonHold;
                     _sumDelta.Value = Vector2.zero;
                     _dragSum = 0;
-                    if (_functionalState.Value != Services.FunctionalState.FrameSelecting)
+                    if (_functionalState.Value == Services.FunctionalState.Free && _unitState.Value == Services.UnitState.Free)
                     {
                         _functionalState.Value = Services.FunctionalState.FrameSelecting;
                     }

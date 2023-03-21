@@ -2,6 +2,7 @@
 using System.Linq;
 using Data;
 using Locator;
+using Models.Components;
 using UniRx;
 using UnityEngine;
 using Views.LevelEditorViews;
@@ -68,14 +69,7 @@ namespace Services
 
         public void AddUnitLevelEditorData(LevelEditorUnitData levelEditorUnitData)
         {
-            if(string.IsNullOrEmpty(levelEditorUnitData.Id))
-                levelEditorUnitData.Id = GenerateId();
             _levelEditorUnitsData.Add(levelEditorUnitData);
-
-            string GenerateId()
-            {
-                return levelEditorUnitData.ConfigId + "_" + _levelEditorUnitsData.Count;
-            }
         }
 
         public void SetMapCorners(Transform[] worldCorners)
@@ -111,6 +105,7 @@ namespace Services
                     ConfigId = editorData.ConfigId,
                     Position = editorData.Position,
                     Rotation = editorData.Rotation,
+                    Direction = editorData.Direction,
                     PlayerIndex = editorData.PlayerIndex
                 });
 
@@ -124,7 +119,21 @@ namespace Services
 
                 var productionConfig = _config.ProductionVariantsConfigs.FirstOrDefault(x => x.Id == id);
                 if (productionConfig != null)
-                    levelSaveData.ComponentProductionSchemaSaveData.Add(new SaveDataProductionVariants(i, productionConfig));
+                    levelSaveData.ComponentProductionSchemaSaveData.Add(new SaveDataProductionSchema(i, productionConfig));
+
+                var sourceConfig = _config.ResourceConfigs.FirstOrDefault(x => x.Id == id);
+                if (sourceConfig != null)
+                {
+                    levelSaveData.ComponentSourceSaveData.Add(new SaveDataSource(i, sourceConfig.Type, sourceConfig.Amount));
+                    JobType type = JobType.None;
+                    if (sourceConfig.Type == ResourceType.Wood)
+                        type = JobType.Chop;
+                    levelSaveData.ComponentRequiredJobSaveData.Add(new SaveDataRequiredJob()
+                    {
+                        Id = i,
+                        Type = type
+                    });
+                }
 
             }
             return levelSaveData;

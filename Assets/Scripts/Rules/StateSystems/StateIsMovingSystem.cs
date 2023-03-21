@@ -13,7 +13,7 @@ namespace Rules.StateSystems
     {
         private EcsFilter _filter;
 
-        private const float _moveTolerance = 0.1f;
+        private const float _moveTolerance = 0.01f;
         public void Init(IEcsSystems systems)
         {
             _filter = systems.GetWorld().Filter<ComponentSensorIsMoving>().Inc<ComponentTransform>().End();

@@ -11,6 +11,7 @@ namespace Views
         [SerializeField] private Camera _camera;
         [SerializeField] private Transform _cameraTransform;
         [SerializeField] private LineRenderer _lineRenderer;
+        [SerializeField] private AudioSource _audioSource;
         private ICameraService _service;
         private Plane _plane = new Plane(Vector3.up, Vector3.zero);
         public Camera Cam => _camera;
@@ -30,6 +31,7 @@ namespace Views
             {
                 _service = Container.Get<ICameraService>();
                 _service.SetView(this);
+                Container.Get<SoundService>().RegisterAudioSource(_audioSource);
             });
             _lineRenderer.widthMultiplier = 5f;
         }

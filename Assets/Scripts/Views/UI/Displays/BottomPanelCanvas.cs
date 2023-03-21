@@ -8,6 +8,7 @@ using Models.Components;
 using Services;
 using Services.PrefabPool;
 using Signals;
+using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,9 +19,13 @@ namespace Views.UI.Displays
     public class BottomPanelCanvas : MonoBehaviour
     {
         [SerializeField] private Image _icon;
+        [SerializeField] private RawImage _iconRendered;
+        [SerializeField] private Camera _avatarCamera;
         [SerializeField] private Transform _actionIconsParent;
         [SerializeField] private Transform _queueParent;
         [SerializeField] private Transform _currentParent;
+        [SerializeField] private Transform _currentInfo;
+        [SerializeField] private TMP_Text _currentInfoText;
         private IUnitsService _unitsService;
         private VisualData _visualData;
         private readonly List<IconButtonView> _iconsList = new List<IconButtonView>();
@@ -52,6 +57,7 @@ namespace Views.UI.Displays
                 _filter3 = _world.Filter<ComponentProductionRun>().End();
                 _current = PrefabPool.InstanceGlobal.Spawn(_visualData.IconButtonView, _currentParent);
                 _current.BindTimer(_progressCurrent, _progressMax);
+                _current.gameObject.SetActive(false);
             });
         }
 
@@ -69,33 +75,75 @@ namespace Views.UI.Displays
             {
                 if(_current != null)
                     _current.gameObject.SetActive(b && _unitSelected.Value >= 0);
-            }).AddTo(_sup);;
-            if (obj < 0)
-            {
-                _icon.enabled = false;
-                _unitSelected.Value = obj;
-                return;
-            }
+            }).AddTo(_sup);
+
             _unitSelected.Value = obj;
-            _icon.enabled = true;
+            _icon.enabled = obj >= 0;
+
+            _avatarCamera.gameObject.SetActive(_unitSelected.Value >= 0);
+            _iconRendered.gameObject.SetActive(_unitSelected.Value >= 0);
+
+            if (_unitSelected.Value >= 0)
+            {
+                _unitsService.Units[_unitSelected.Value].ParentCamera(_avatarCamera);
+            }
 
             UpdateSelectedUnit();
             UpdateProductionSchema();
             UpdateProductionQueue();
+            UpdateInfo();
+        }
 
+        private void UpdateInfo()
+        {
+            if (_unitSelected.Value < 0)
+            {
+                _currentInfo.gameObject.SetActive(false);
+                return;
+            }
 
+            if (_unitSelected.Value.Has<ComponentInfo>(_world)
+                && !_unitSelected.Value.Has<ComponentProductionSchema>(_world))
+            {
+                _currentInfo.gameObject.SetActive(true);
+                var c1 = _unitSelected.Value.Get<ComponentInfo>(_world);
+                _currentInfoText.text = $"<size=130%>{c1.Title}</size>\n{c1.Description}";
+            }
+            else
+            {
+                _currentInfo.gameObject.SetActive(false);
+            }
         }
 
         private void UpdateSelectedUnit()
         {
+            if (_unitSelected.Value < 0)
+            {
+                _icon.enabled = false;
+                return;
+            }
             var selectedUnit = _world.GetPool<ComponentUnit>().Get(_unitSelected.Value);
             var sprite = _visualData.Sprites.FirstOrDefault(x => x.Id == selectedUnit.ConfigId)?.Obj;
             if (sprite != null)
+            {
+                _icon.enabled = true;
                 _icon.sprite = sprite;
+            }
+            else
+            {
+                _icon.enabled = false;
+            }
         }
 
         private void UpdateProductionQueue()
         {
+            if (_unitSelected.Value < 0)
+            {
+                _queueParent.gameObject.SetActive(false);
+                return;
+            }
+            _queueParent.gameObject.SetActive(true);
+
             var productionQueuePool = _world.GetPool<ComponentProductionQueue>();
             if (productionQueuePool.Has(_unitSelected.Value))
             {
@@ -106,6 +154,10 @@ namespace Views.UI.Displays
 
         private void UpdateProductionSchema()
         {
+            if (_unitSelected.Value < 0)
+            {
+                return;
+            }
             var productionSchemaPool = _world.GetPool<ComponentProductionSchema>();
             if (productionSchemaPool.Has(_unitSelected.Value))
             {
@@ -129,6 +181,8 @@ namespace Views.UI.Displays
         {
             if(_unitSelected.Value < 0)
                 return;
+
+            UpdateInfo();
 
             foreach (var i in _filter)
             {
@@ -158,17 +212,13 @@ namespace Views.UI.Displays
                 if (i == _unitSelected.Value)
                 {
                     var c1 = _world.GetPool<ComponentProductionRun>().Get(i);
-                    _current.Bind(c1.Result, new MainSignals.ProductionEnqueueRequest(c1.Result, _unitSelected.Value));
+                    _current.Bind(c1.Result, new MainSignals.ProductionDequeueRequest(c1.Result,_unitSelected.Value, 0));
                     _world.GetPool<ComponentProductionProgressStarted>().Del(i);
-
                 }
             }
-
         }
 
-
-
-        private void ShowQueue(List<string> queue, int i)
+        private void ShowQueue(IReadOnlyList<string> queue, int i)
         {
             _iconsQueueList.ForEach(x=>x.Dispose());
             _iconsQueueList.Clear();

@@ -6,39 +6,31 @@ namespace Ai.UnitAi
 {
     public class SensorIsMoving : SensorBoolBase
     {
-        public static string SensorId => "is_moving";
-        private static readonly int SensorIdHash = Animator.StringToHash(SensorId);
-        private EcsWorld _world;
-        private int _i;
-        private bool _isSet;
-        public SensorIsMoving()
-        {
-        }
+        public static string SensorId = nameof(SensorIsMoving);
+        private static readonly int ParamHash = Animator.StringToHash("is_moving");
 
-        public override void BindEntity(EcsWorld world, int i)
+
+        public override void Bind(EcsWorld w, int e)
         {
-            _i = i;
-            _world = world;
-            world.GetPool<ComponentSensorIsMoving>().Add(i);
-            _isSet = true;
+            base.Bind(w, e);
+            world.GetPool<ComponentSensorIsMoving>().Add(e);
         }
 
         private void SetAnimatorParam(bool value)
         {
-            animator.SetBool(SensorIdHash, value);
+            animator.SetBool(ParamHash, value);
         }
 
         public override void Update()
         {
-            if(!_isSet)
+            if(!isSet)
                 return;
 
-            SetAnimatorParam(_world.GetPool<ComponentSensorIsMoving>().Get(_i).Value);
+            SetAnimatorParam(world.GetPool<ComponentSensorIsMoving>().Get(i).Value);
         }
         protected override void OnReset()
         {
-            _isSet = false;
+            isSet = false;
         }
     }
-
 }

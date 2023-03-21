@@ -1,13 +1,11 @@
 using Ai.UnitAi;
 using Leopotam.EcsLite;
-using Leopotam.EcsLite.UnityEditor;
 using Locator;
 using Models.Components;
 using Services;
 using Services.PrefabPool;
 using Signals;
 using UniRx;
-using UnityEditor.AI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -19,6 +17,8 @@ namespace Views
         [SerializeField] private GameObject _selected;
         [SerializeField] private GameObject _hovered;
         [SerializeField] private StateMachineController _stateMachineController;
+        [SerializeField] private Transform _cameraAnchor;
+
         private GameMessenger _messenger;
 
         public string ConfigId => _configId;
@@ -72,6 +72,8 @@ namespace Views
             if(_entity > -1)
                 _world?.DelEntity(_entity);
             _entity = -1;
+            if(_stateMachineController != null)
+                _stateMachineController.Reset();
         }
 
         public override void Dispose()
@@ -98,6 +100,22 @@ namespace Views
         public void OnPointerExit(PointerEventData eventData)
         {
             _messenger.Fire(new MainSignals.HoverRequest(_entity, false));
+        }
+
+
+        public void ParentCamera(Camera avatarCamera)
+        {
+            if (_cameraAnchor != null)
+            {
+                avatarCamera.transform.SetParent(_cameraAnchor);
+                avatarCamera.transform.localPosition = Vector3.zero;
+                avatarCamera.transform.localRotation = Quaternion.identity;
+                avatarCamera.transform.localScale = Vector3.one;
+            }
+            else
+            {
+                avatarCamera.gameObject.SetActive(false);
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Models.Components;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Data
@@ -12,6 +14,7 @@ namespace Data
         public AttackConfig[] AttackConfigs;
         public MoveConfig[] MoveConfigs;
         public ProductionVariantsConfig[] ProductionVariantsConfigs;
+        public ResourceConfig[] ResourceConfigs;
         public ResultConfig[] ResultConfigs;
         public BuildConfig[] BuildConfigs;
     }
@@ -83,7 +86,12 @@ namespace Data
     public class ProductionVariantsConfig : ConfigElementBase
     {
         public List<ProductionVariantConfig> ProductionVariantConfigs = new List<ProductionVariantConfig>();
-
+    }
+    [Serializable]
+    public class ResourceConfig : ConfigElementBase
+    {
+        public float Amount;
+        public ResourceType Type;
     }
     [Serializable]
     public class ProductionVariantConfig

@@ -6,18 +6,31 @@ namespace Ai.UnitAi
 {
     public class StateHolder : StateMachineBehaviour
     {
-        public List<StateAction> ActionsUpdate;
+        public List<AiStateAction> Actions;
+
+        private StateMachineController _stateMachineController;
+
+        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        {
+            if (_stateMachineController == null)
+                _stateMachineController = animator.gameObject.GetComponent<StateMachineController>();
+
+            _stateMachineController.OnEnter(Actions);
+        }
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex,
             AnimatorControllerPlayable controller)
         {
-            base.OnStateUpdate(animator, stateInfo, layerIndex, controller);
+            _stateMachineController.OnUpdate(Actions);
         }
     }
 
-    [System.Serializable]
-    public class StateAction
+
+    public enum AiStateAction
     {
-        public string Id;
+        FindMoveTarget,
+        FindJobObject,
+        RotateToEntityTarget,
+
     }
 }
